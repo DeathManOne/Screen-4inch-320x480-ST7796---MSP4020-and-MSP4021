@@ -1,0 +1,14 @@
+{
+  "name": "ST7796S - for MSP4020 and MSP4021",
+  "version": "1.0.0",
+  "license": "Unlicense",
+  "keywords": "screen, clone, 4inch, 320x480, st7796, st7796s, msp4020, msp421, esp, spi, arduino",
+  "description": "Driver for clone screen 4inch 320x480 ST7796s - for MSP4020 and MSP4021",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/DeathManOne/Screen-4inch-320x480-ST7796---MSP4020-and-MSP4021.git"
+  },
+  "frameworks": "arduino",
+  "platforms": ["espressif32"]
+}
