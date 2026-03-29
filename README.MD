@@ -5,32 +5,32 @@
 - [UserManual](https://www.lcdwiki.com/res/MSP4021/4.0inch_SPI_Module_MSP4020&MSP4021_User_Manual_EN.pdf)
 ## NEXT STEP
 - change rotation without a new calibration (again)
-- add font
+- add fonts
 ## WHAT IS WHAT
-- MSP4020 -> screen only
-- MSP4021 -> MSP4020 + touchscreen
+- **MSP4020** -> `screen` only
+- **MSP4021** -> `MSP4020` + `TouchScreen`
 ## PINS CONNECTIONS
-`pins numbers are from Arduino nano ESP32`
+- pins numbers are from `Arduino nano ESP32`
 ### Screen
-| Name    | Pin on board | Description             |
-| :------ | :----------- | :---------------------- |
-| `VCC`   | `3.3v`   | ***`works for me, if not for you, then 5v`*** |
-| `GND`   | `ground`     | |
-| `CS`    | `10`         | `or an other available pin` |
-| `RESET` | `3.3v`       | `or an available pin` |
-| `DC/RS` | `5`          | `or an other available pin` |
-| `SDI`   | `11`         | ***`SPI_MOSI`*** |
-| `SCK`   | `13`         | ***`SPI_CLK`*** |
-| `LED`   | `3.3v`       |  |
-| `SDO`   | **`not connected`** |  |
+| Name  | Pin on board | Description             |
+| :---- | :----------- | :---------------------- |
+| VCC   | `3.3v`       | ***works for me, if not for you, then 5v*** |
+| GND   | `ground`     | |
+| CS    | `10`         | or an other available pin |
+| RESET | `3.3v`       | or an available pin |
+| DC/RS | `5`          | or an other available pin |
+| SDI   | `11`         | ***`SPI_MOSI`*** |
+| SCK   | `13`         | ***`SPI_CLK`*** |
+| LED   | `3.3v`       |  |
+| SDO   | **not connected** |  |
 ### Touch
-| Name    | Pin on board | Description               |
-| :-------| :----------- | :------------------------ |
-| `T_CLK` | `13`         | ***`SPI_CLK`*** |
-| `T_CS`  | `4`          | `or an other available pin` |
-| `T_DIN` | `11`         | ***`SPI_MOSI`*** |
-| `T_DO`  | `12`         | ***`SPI_MISO`*** |
-| `T_IRQ` | **`not connected`** |  |
+| Name  | Pin on board | Description               |
+| :-----| :----------- | :------------------------ |
+| T_CLK | `13`         | ***`SPI_CLK`*** |
+| T_CS  | `4`          | or an other available pin |
+| T_DIN | `11`         | ***`SPI_MOSI`*** |
+| T_DO  | `12`         | ***`SPI_MISO`*** |
+| T_IRQ | **not connected** |  |
 ## EXAMPLES (for tests)
 ### MSP4020 and MSP4021
 - also work for MSP4021 if you don't want to use TouchScreen
@@ -115,16 +115,18 @@ void loop() {
     delay(1500);
     _TFT->rect(x, y, 20, 20, _TFT->rgb(0, 0, 0));
   }
-
-  // NEVER USE MULTIPLE SPI AT THE SAME TIME
-  // THEN, IF NEEDED (FOR TOUCH)
-  bool TUsed = _TFT->TUsed();
-  if (TUsed)
-    { _TFT->TStop(); }
-  //
-  // YOUR CODE
-  //
-  if (TUsed)
-    { _TFT->TStart(); }
 }
+```
+## USING
+### TOUCH
+#### STOP SPI FOR A TIME
+```c++
+bool TUsed = _TFT->TUsed();
+if (TUsed)
+  { _TFT->TStop(); }
+//
+// YOUR CODE
+//
+if (TUsed)
+  { _TFT->TStart(); }
 ```
