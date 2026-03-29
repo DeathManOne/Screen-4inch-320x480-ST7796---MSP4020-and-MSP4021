@@ -85,18 +85,22 @@ void setup() {
   SPI.begin();
 
   _TFT = new ST7796S::MSP4021(SPI, TOUCH_CS, TFT_CS, TFT_DC, SCREEN_WIDTH, SCREEN_HEIGHT, TFT_RST);
-  while (!_TFT->TCalibrate()) {}
 
+  // IN ORDER TO SET CALIBRATE (EX: FROM SAVED FILE)
+  //_TFT->TCalibrate(swapXY, invertX, invertY, coeffXA, coeffXB, coeffXC, coeffYA, coeffYB, coeffYC);
+
+  // AUTO CALIBRATE
+  while (!_TFT->TCalibrate());
   /** IN ORDER TO SAVE CALIBRATION
-   * _TFT->getInvertX(); // bool
-   * _TFT->getInvertY(); // bool
-   * _TFT->getSwapXY(); // bool
-   * _TFT->getCoeffXA(); // float
-   * _TFT->getCoeffXB(); // float
-   * _TFT->getCoeffXC(); // float
-   * _TFT->getCoeffYA(); // float
-   * _TFT->getCoeffYB(); // float
-   * _TFT->getCoeffYC(); // float
+   * _TFT->TGetInvertX(); // bool
+   * _TFT->TGetInvertY(); // bool
+   * _TFT->TGetSwapXY(); // bool
+   * _TFT->TGetCoeffXA(); // float
+   * _TFT->TGetCoeffXB(); // float
+   * _TFT->TGetCoeffXC(); // float
+   * _TFT->TGetCoeffYA(); // float
+   * _TFT->TGetCoeffYB(); // float
+   * _TFT->TGetCoeffYC(); // float
    */
   _TFT->fillScreen(_TFT->rgb(0, 0, 0));
 }
@@ -104,12 +108,23 @@ void setup() {
 void loop() {
   delay(500);
 
-  int x, y;
+  int x=0, y=0;
   bool antiSmoothing = true; // optional | default = true
   if (_TFT->TRead(x, y, antiSmoothing)) {
     _TFT->rect(x, y, 20, 20, _TFT->rgb(0, 255, 0));
-    delay(3000);
+    delay(1500);
     _TFT->rect(x, y, 20, 20, _TFT->rgb(0, 0, 0));
   }
+
+  // NEVER USE MULTIPLE SPI AT THE SAME TIME
+  // THEN, IF NEEDED (FOR TOUCH)
+  bool TUsed = _TFT->TUsed();
+  if (TUsed)
+    { _TFT->TStop(); }
+  //
+  // YOUR CODE
+  //
+  if (TUsed)
+    { _TFT->TStart(); }
 }
 ```
