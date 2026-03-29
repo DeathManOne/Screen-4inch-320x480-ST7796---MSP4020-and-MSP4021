@@ -12,83 +12,53 @@
 ## PINS CONNECTIONS
 - pins numbers are from `Arduino nano ESP32`
 ### Screen
-| Name  | Pin on board | Description             |
-| :---- | :----------- | :---------------------- |
-| VCC   | `3.3v`       | ***works for me, if not for you, then 5v*** |
-| GND   | `ground`     | |
-| CS    | `10`         | or an other available pin |
-| RESET | `3.3v`       | or an available pin |
-| DC/RS | `5`          | or an other available pin |
-| SDI   | `11`         | ***`SPI_MOSI`*** |
-| SCK   | `13`         | ***`SPI_CLK`*** |
-| LED   | `3.3v`       |  |
-| SDO   | **not connected** |  |
+| Name  | Pin on board      | Description                                 |
+| :---- | :---------------- | :------------------------------------------ |
+| VCC   | `3.3v`            | ***works for me, if not for you, then 5v*** |
+| GND   | `ground`          |                                             |
+| CS    | `10`              | or an other available pin                   |
+| RESET | `3.3v`            | or an available pin                         |
+| DC/RS | `5`               | or an other available pin                   |
+| SDI   | `11`              | ***`SPI_MOSI`***                            |
+| SCK   | `13`              | ***`SPI_CLK`***                             |
+| LED   | `3.3v`            |                                             |
+| SDO   | **not connected** |                                             |
 ### Touch
-| Name  | Pin on board | Description               |
-| :-----| :----------- | :------------------------ |
-| T_CLK | `13`         | ***`SPI_CLK`*** |
-| T_CS  | `4`          | or an other available pin |
-| T_DIN | `11`         | ***`SPI_MOSI`*** |
-| T_DO  | `12`         | ***`SPI_MISO`*** |
-| T_IRQ | **not connected** |  |
-## EXAMPLES (for tests)
-### MSP4020
-See in `test/screen.ino`
-### MSP4021
-```c++
-#include <Arduino.h>
-#include <SPI.h>
-#include <MSP4021.h>
-
-#define TFT_CS 10
-#define TFT_DC 5
-#define TFT_RST -1 // 3.3v or an available pin you want
-
-#define TOUCH_CS 4
-
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 480
-
-ST7796S::MSP4021 *_TFT;
-
-void setup() {
-  SPI.begin();
-
-  _TFT = new ST7796S::MSP4021(SPI, TOUCH_CS, TFT_CS, TFT_DC, SCREEN_WIDTH, SCREEN_HEIGHT, TFT_RST);
-
-  // IN ORDER TO SET CALIBRATE (EX: FROM SAVED FILE)
-  //_TFT->TCalibrate(swapXY, invertX, invertY, coeffXA, coeffXB, coeffXC, coeffYA, coeffYB, coeffYC);
-
-  // AUTO CALIBRATE
-  while (!_TFT->TCalibrate());
-  /** IN ORDER TO SAVE CALIBRATION
-   * _TFT->TGetInvertX(); // bool
-   * _TFT->TGetInvertY(); // bool
-   * _TFT->TGetSwapXY(); // bool
-   * _TFT->TGetCoeffXA(); // float
-   * _TFT->TGetCoeffXB(); // float
-   * _TFT->TGetCoeffXC(); // float
-   * _TFT->TGetCoeffYA(); // float
-   * _TFT->TGetCoeffYB(); // float
-   * _TFT->TGetCoeffYC(); // float
-   */
-  _TFT->fillScreen(_TFT->rgb(0, 0, 0));
-}
-
-void loop() {
-  delay(500);
-
-  int x=0, y=0;
-  bool antiSmoothing = true; // optional | default = true
-  if (_TFT->TRead(x, y, antiSmoothing)) {
-    _TFT->rect(x, y, 20, 20, _TFT->rgb(0, 255, 0));
-    delay(1500);
-    _TFT->rect(x, y, 20, 20, _TFT->rgb(0, 0, 0));
-  }
-}
-```
+| Name  | Pin on board      | Description               |
+| :-----| :---------------- | :------------------------ |
+| T_CLK | `13`              | ***`SPI_CLK`***           |
+| T_CS  | `4`               | or an other available pin |
+| T_DIN | `11`              | ***`SPI_MOSI`***          |
+| T_DO  | `12`              | ***`SPI_MISO`***          |
+| T_IRQ | **not connected** |                           |
+## EXAMPLES
+| Test        | File               | Description                                                  |
+| :---------- | :----------------- | :----------------------------------------------------------- |
+| Screen      | `tests/screen.ino` | check whether your screen works and well connected           |
+| TouchScreen | `tests/touch.ino`  | check whether your Touch and screen works and well connected |
 ## TOUCH
-#### STOP SPI (for a time)
+### CALIBRATE
+#### FROM SAVED FILE
+```c++
+_TFT->TCalibrate(swapXY, invertX, invertY, coeffXA, coeffXB, coeffXC, coeffYA, coeffYB, coeffYC);
+```
+#### AUTO-CALIBRATE (with save)
+```c++
+while (!_TFT->TCalibrate());
+/** IN ORDER TO SAVE CALIBRATION
+  * _TFT->TGetInvertX(); // bool
+  * _TFT->TGetInvertY(); // bool
+  * _TFT->TGetSwapXY();  // bool
+  *
+  * _TFT->TGetCoeffXA(); // float
+  * _TFT->TGetCoeffXB(); // float
+  * _TFT->TGetCoeffXC(); // float
+  * _TFT->TGetCoeffYA(); // float
+  * _TFT->TGetCoeffYB(); // float
+  * _TFT->TGetCoeffYC(); // float
+  */
+```
+### STOP SPI (for a time)
 ```c++
 bool TUsed = _TFT->TUsed();
 if (TUsed)
