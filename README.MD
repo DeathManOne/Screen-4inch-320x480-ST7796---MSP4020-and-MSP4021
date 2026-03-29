@@ -46,7 +46,7 @@
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 480
 
-ST7796S::MSP4021 *_TFT;
+ST7796S::MSP4020 *_TFT;
 
 void setup() {
   SPI.begin();
