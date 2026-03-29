@@ -41,7 +41,7 @@
 
 #define TFT_CS 10
 #define TFT_DC 5
-#define TFT_RST -1
+#define TFT_RST -1 // 3.3v or an available pin you want
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 480
