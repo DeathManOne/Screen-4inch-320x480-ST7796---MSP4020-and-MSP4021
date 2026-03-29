@@ -7,28 +7,29 @@ MSP4021::MSP4021(SPIClass &spi, int pinCS_TOUCH, int pinCS_TFT, int pinDC_TFT, i
     this->_LAST_X = new int(-1);
     this->_LAST_Y = new int(-1);
 
+    this->_SWAP_XY = new bool(false);
     this->_INVERT_X = new bool(false);
     this->_INVERT_Y = new bool(false);
-    this->_SWAP_XY = new bool(false);
 
     this->_COEFF_XA = new float(1);
     this->_COEFF_XB = new float(0);
     this->_COEFF_XC = new float(0);
+
     this->_COEFF_YA = new float(0);
     this->_COEFF_YB = new float(1);
     this->_COEFF_YC = new float(0);
 
     pinMode(pinCS_TOUCH, OUTPUT);
-    this->CS_HIGH();
+    this->TStop();
 }
 
 MSP4021::~MSP4021() {
     delete this->_PIN_CS;
     delete this->_LAST_X;
     delete this->_LAST_Y;
+    delete this->_SWAP_XY;
     delete this->_INVERT_X;
     delete this->_INVERT_Y;
-    delete this->_SWAP_XY;
     delete this->_COEFF_XA;
     delete this->_COEFF_XB;
     delete this->_COEFF_XC;
@@ -38,11 +39,11 @@ MSP4021::~MSP4021() {
 }
 
 uint16_t MSP4021::readRaw(uint8_t cmd) {
-    this->CS_LOW();
+    this->TStart();
     this->_SPI->transfer(cmd);
     uint8_t high = this->_SPI->transfer(0x00);
     uint8_t low = this->_SPI->transfer(0x00);
-    this->CS_HIGH();
+    this->TStop();
     return ((high << 8) | low) >> 3;
 }
 
@@ -268,4 +269,18 @@ bool MSP4021::TCalibrate() {
             { return false; }
     }
     return this->affineCalibration(sx, sy, rx, ry, count);
+}
+
+void MSP4021::TCalibrate(bool swapXY, bool invertX, bool invertY, float CXA, float CXB, float CXC, float CYA, float CYB, float CYC) {
+    *this->_SWAP_XY = swapXY;
+    *this->_INVERT_X = invertX;
+    *this->_INVERT_Y = invertY;
+
+    *this->_COEFF_XA = CXA;
+    *this->_COEFF_XB = CXB;
+    *this->_COEFF_XC = CXC;
+
+    *this->_COEFF_YA = CYA;
+    *this->_COEFF_YB = CYB;
+    *this->_COEFF_YC = CYC;
 }
