@@ -4,7 +4,7 @@
 - [DataSheet](https://www.lcdwiki.com/res/MSP4021/ST7796S-Sitronix.pdf)
 - [UserManual](https://www.lcdwiki.com/res/MSP4021/4.0inch_SPI_Module_MSP4020&MSP4021_User_Manual_EN.pdf)
 ## NEXT STEP
-- change rotation without a new calibration (again)
+- change rotation for touch
 - add fonts
 ## WHAT IS WHAT
 - **MSP4020** -> `screen` only
@@ -32,10 +32,11 @@
 | T_DO  | `12`              | ***`SPI_MISO`***          |
 | T_IRQ | **not connected** |                           |
 ## EXAMPLES
-| Test        | File               | Description                                                  |
-| :---------- | :----------------- | :----------------------------------------------------------- |
-| Screen      | `tests/screen.ino` | check whether your screen works and well connected           |
-| TouchScreen | `tests/touch.ino`  | check whether your Touch and screen works and well connected |
+| Test     | File                        | Description                                                  |
+| :------- | :-------------------------- | :----------------------------------------------------------- |
+| Screen   | `tests/screen.ino`          | check whether your screen works and well connected           |
+| rotation | `tests/screen_rotation.ino` | check rotation with point 0-0 and point maxX-maxY            |
+| Touch    | `tests/touch.ino`           | check whether your Touch and screen works and well connected |
 ## TOUCH
 ### CALIBRATE
 #### FROM SAVED FILE
