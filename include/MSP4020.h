@@ -7,7 +7,7 @@
 namespace ST7796S {
     class MSP4020 {
         private:
-            int *_PIN_CS, *_PIN_DC, *_PIN_RST;
+            int *_PIN_CS, *_PIN_DC, *_PIN_RST, *_RAW_WIDTH, *_RAW_HEIGHT, *_SCREEN_ROTATION;
             static const int _BUFFER_SIZE = 1024;
             uint16_t _BUFFER_A[_BUFFER_SIZE], _BUFFER_B[_BUFFER_SIZE];
             uint16_t *_BUFFER_CPU = _BUFFER_A, *_BUFFER_DMA = _BUFFER_B;
@@ -32,6 +32,7 @@ namespace ST7796S {
             inline bool used() { return digitalRead(*this->_PIN_CS) == LOW; }
             inline uint16_t rgb(uint8_t red, uint8_t green, uint8_t blue) { return ((blue & 0xF8) << 8) | ((red & 0xFC) << 3) | (green >> 3); }
             inline void fillScreen(uint16_t color) { this->rect(0, 0, *this->_SCREEN_WIDTH, *this->_SCREEN_HEIGHT, color); }
+            void setRotation(int rotation = 1);
             void rect(int x, int y, int width, int height, uint16_t color);
             void lineH(int x, int y, int width, uint16_t color);
             void lineV(int x, int y, int height, uint16_t color);

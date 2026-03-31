@@ -5,13 +5,23 @@ MSP4020::MSP4020(SPIClass &spi, int pinCS, int pinDC, int screenWidth, int scree
   this->_PIN_CS = new int(pinCS);
   this->_PIN_DC = new int(pinDC);
   this->_PIN_RST = new int(pinRST);
-  this->_SCREEN_WIDTH = new int(screenWidth);
-  this->_SCREEN_HEIGHT = new int(screenHeight);
+
+  if (screenWidth > screenHeight) {
+    this->_RAW_WIDTH = new int(screenHeight);
+    this->_RAW_HEIGHT = new int(screenWidth);
+    this->_SCREEN_WIDTH = new int(screenHeight);
+    this->_SCREEN_HEIGHT = new int(screenWidth);
+  } else {
+    this->_RAW_WIDTH = new int(screenWidth);
+    this->_RAW_HEIGHT = new int(screenHeight);
+    this->_SCREEN_WIDTH = new int(screenWidth);
+    this->_SCREEN_HEIGHT = new int(screenHeight);
+  }
+  this->_SCREEN_ROTATION = new int(0);
 
   this->_SPI = &spi;
   this->_SETTINGS = new SPISettings(4000000u, MSBFIRST, SPI_MODE0);
   
-
   if (pinRST != -1)
     { pinMode(pinRST, OUTPUT); }
   pinMode(pinCS, OUTPUT);
@@ -26,8 +36,11 @@ MSP4020::~MSP4020() {
   delete this->_PIN_CS;
   delete this->_PIN_DC;
   delete this->_PIN_RST;
+  delete this->_RAW_WIDTH;
+  delete this->_RAW_HEIGHT;
   delete this->_SCREEN_WIDTH;
   delete this->_SCREEN_HEIGHT;
+  delete this->_SCREEN_ROTATION;
   delete this->_SPI;
   delete this->_SETTINGS;
 }
@@ -152,6 +165,11 @@ void MSP4020::writeData(const uint8_t *data, int length) {
 }
 
 void MSP4020::setAddress(int x0, int y0, int x1, int y1) {
+  if (x0 > x1)
+    { std::swap(x0, x1); }
+  if (y0 > y1)
+    { std::swap(y0, y1); }
+
   uint8_t d[4];
 
   this->writeCmd(0x2A);
@@ -175,4 +193,37 @@ void MSP4020::swapBuffers() {
     uint16_t *tmp = this->_BUFFER_CPU;
     this->_BUFFER_CPU = this->_BUFFER_DMA;
     this->_BUFFER_DMA = tmp;
+}
+
+void MSP4020::setRotation(int rotation) {
+  *this->_SCREEN_ROTATION = (rotation % 4 + 4) % 4;
+
+  uint8_t d;
+  switch (*this->_SCREEN_ROTATION) {
+    case 1:
+      d = 0x28;
+      break;
+    case 2:
+      d = 0x88;
+      break;
+    case 3:
+      d = 0xE8;
+      break;
+    default:
+      d = 0x48;
+      break;
+  }
+
+  if (*this->_SCREEN_ROTATION % 2 == 0) {
+    *this->_SCREEN_WIDTH = *this->_RAW_WIDTH;
+    *this->_SCREEN_HEIGHT = *this->_RAW_HEIGHT;
+  } else {
+    *this->_SCREEN_WIDTH = *this->_RAW_HEIGHT;
+    *this->_SCREEN_HEIGHT = *this->_RAW_WIDTH;
+  }
+
+  this->transactionBegin();
+  this->writeCmd(0x36);
+  this->writeData(&d, 1);
+  this->transactionEnd();
 }
