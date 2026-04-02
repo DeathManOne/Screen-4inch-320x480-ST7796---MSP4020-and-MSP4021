@@ -4,7 +4,7 @@
 - [DataSheet](https://www.lcdwiki.com/res/MSP4021/ST7796S-Sitronix.pdf)
 - [UserManual](https://www.lcdwiki.com/res/MSP4021/4.0inch_SPI_Module_MSP4020&MSP4021_User_Manual_EN.pdf)
 ## NEXT STEP
-- change rotation for touch
+- make calibration more accurate
 - add fonts
 ## WHAT IS WHAT
 - **MSP4020** -> `screen` only
