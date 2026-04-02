@@ -48,13 +48,16 @@ uint16_t MSP4021::readRaw(uint8_t cmd) {
 }
 
 uint16_t MSP4021::readAverage(uint8_t cmd) {
-    uint16_t v[9];
-    for (int i = 0; i < 9; i++) {
+    const int N = 15;
+    uint16_t v[N];
+
+    for (int i = 0; i < N; i++) {
         v[i] = this->readRaw(cmd);
-        delayMicroseconds(10);
+        delayMicroseconds(15);
     }
-    for (int i = 0; i < 8; i++) {
-        for (int j = i + 1; j < 9; j++) {
+
+    for (int i = 0; i < N - 1; i++) {
+        for (int j = i + 1; j < N; j++) {
             if (v[j] < v[i]) {
                 uint16_t tmp = v[i];
                 v[i] = v[j];
@@ -62,7 +65,11 @@ uint16_t MSP4021::readAverage(uint8_t cmd) {
             }
         }
     }
-    return v[4];
+
+    uint32_t sum = 0;
+    for (int i = 4; i < 11; i++)
+        { sum += v[i]; }
+    return sum / 7;
 }
 
 uint16_t MSP4021::readPressure() {
@@ -74,14 +81,16 @@ uint16_t MSP4021::readPressure() {
     return z2 - z1;
 }
 
-void MSP4021::waitForTouch(uint16_t &outX, uint16_t &outY) {
+void MSP4021::waitForTouch(uint16_t &x, uint16_t &y) {
+    const int stabilityThreshold = 15;
+
     while (true) {
         uint16_t samplesX[5], samplesY[5];
 
         for (int i = 0; i < 5; i++) {
             samplesX[i] = this->readAverage(0x90);
             samplesY[i] = this->readAverage(0xD0);
-            delay(10);
+            delay(5);
         }
 
         uint32_t sumX = 0, sumY = 0;
@@ -92,21 +101,24 @@ void MSP4021::waitForTouch(uint16_t &outX, uint16_t &outY) {
 
         uint16_t avgX = sumX / 5;
         uint16_t avgY = sumY / 5;
-
         if (avgX < 200 || avgX > 3900 || avgY < 200 || avgY > 3900)
+            { continue; }
+        if (this->readPressure() < 50)
             { continue; }
 
         bool stable = true;
         for (int i = 0; i < 5; i++) {
-            if (abs((int)samplesX[i] - avgX) > 25 || abs((int)samplesY[i] - avgY) > 25) {
+            if (abs((int)samplesX[i] - avgX) > stabilityThreshold ||
+                abs((int)samplesY[i] - avgY) > stabilityThreshold) {
                 stable = false;
                 break;
             }
         }
+
         if (!stable || !this->isTouched())
-            { continue; }
-        outX = avgX;
-        outY = avgY;
+            { continue;} 
+        x = avgX;
+        y = avgY;
         break;
     }
 }
@@ -130,6 +142,18 @@ bool MSP4021::isTouched() {
     return this->readPressure() > 30;
 }
 
+void MSP4021::drawCalibrationPoint(int x, int y, uint16_t &rx, uint16_t &ry) {
+    const int size = 20;
+
+    this->rect(x, y, size, size, this->rgb(255, 0, 0));
+    this->waitForTouch(rx, ry);
+    this->waitRelease();
+
+    this->rect(x, y, size, size, this->rgb(0, 255, 0));
+    delay(250);
+    this->rect(x, y, size, size, this->rgb(0, 0, 0));
+}
+
 void MSP4021::applyOrientation(uint16_t &x, uint16_t &y) {
     if (*this->_SWAP_XY)
         { std::swap(x,y); }
@@ -141,21 +165,9 @@ void MSP4021::applyOrientation(uint16_t &x, uint16_t &y) {
 
 void MSP4021::detectOrientation() {
     uint16_t x[3], y[3];
-
-    this->rect(0, 0, 20, 20, this->rgb(255, 0, 0));
-    this->waitForTouch(x[0], y[0]);
-    this->waitRelease();
-    this->rect(0, 0, 20, 20, this->rgb(0, 0, 0));
-
-    this->rect(*this->_SCREEN_WIDTH - 20, 0, 20, 20, this->rgb(255, 0, 0));
-    this->waitForTouch(x[1], y[1]);
-    this->waitRelease();
-    this->rect(*this->_SCREEN_WIDTH - 20, 0, 20, 20, this->rgb(0, 0, 0));
-
-    this->rect(0, *this->_SCREEN_HEIGHT - 20, 20, 20, this->rgb(255, 0, 0));
-    this->waitForTouch(x[2], y[2]);
-    this->waitRelease();
-    this->rect(0, *this->_SCREEN_HEIGHT - 20, 20, 20, this->rgb(0, 0, 0));
+    this->drawCalibrationPoint(0, 0, x[0], y[0]);
+    this->drawCalibrationPoint(*this->_SCREEN_WIDTH - 20, 0, x[1], y[1]);
+    this->drawCalibrationPoint(0, *this->_SCREEN_HEIGHT - 20, x[2], y[2]);
 
     int dx_h = abs((int)x[1] - (int)x[0]);
     int dy_h = abs((int)y[1] - (int)y[0]);
@@ -176,25 +188,42 @@ bool MSP4021::affineCalibration(float *sx, float *sy, float *rx, float *ry, int 
     float x1 = rx[0], y1 = ry[0];
     float x2 = rx[1], y2 = ry[1];
     float x3 = rx[2], y3 = ry[2];
-
     float X1 = sx[0], Y1 = sy[0];
     float X2 = sx[1], Y2 = sy[1];
     float X3 = sx[2], Y3 = sy[2];
-
     float det = (x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2));
 
     if (fabs(det) < 1e-6)
         { return false; }
-
     *this->_COEFF_XA = (X1*(y2 - y3) + X2*(y3 - y1) + X3*(y1 - y2)) / det;
     *this->_COEFF_XB = (X1*(x3 - x2) + X2*(x1 - x3) + X3*(x2 - x1)) / det;
     *this->_COEFF_XC = (X1*(x2*y3 - x3*y2) + X2*(x3*y1 - x1*y3) + X3*(x1*y2 - x2*y1)) / det;
-
     *this->_COEFF_YA = (Y1*(y2 - y3) + Y2*(y3 - y1) + Y3*(y1 - y2)) / det;
     *this->_COEFF_YB = (Y1*(x3 - x2) + Y2*(x1 - x3) + Y3*(x2 - x1)) / det;
     *this->_COEFF_YC = (Y1*(x2*y3 - x3*y2) + Y2*(x3*y1 - x1*y3) + Y3*(x1*y2 - x2*y1)) / det;
-
     return true;
+}
+
+void MSP4021::transform(float &x, float &y) {
+  int tmp;
+  switch (*this->_SCREEN_ROTATION) {
+    case 1:
+        tmp = x;
+        x = y;
+        y = *this->_SCREEN_HEIGHT - 1 - tmp;
+        break;
+    case 2:
+        x = *this->_SCREEN_WIDTH - 1 - x;
+        y = *this->_SCREEN_HEIGHT - 1 - y;
+        break;
+    case 3:
+        tmp = x;
+        x = *this->_SCREEN_WIDTH - 1 - y;
+        y = tmp;
+        break;
+    default:
+        break;
+  }
 }
 
 bool MSP4021::TRead(int &x, int &y, bool antiSmoothing) {
@@ -203,28 +232,37 @@ bool MSP4021::TRead(int &x, int &y, bool antiSmoothing) {
         *this->_LAST_Y = -1;
     }
 
-    uint16_t rawX = this->readAverage(0x90);
-    uint16_t rawY = this->readAverage(0xD0);
-    if (!this->isTouched()) {
+    uint16_t pressure = this->readPressure();
+    if (pressure < 60) {
         *this->_LAST_X = -1;
         *this->_LAST_Y = -1;
         return false;
     }
+
+    uint16_t rawX = this->readAverage(0x90);
+    uint16_t rawY = this->readAverage(0xD0);
+    if (rawX < 50 || rawY < 50)
+        { return false; }
     this->applyOrientation(rawX, rawY);
 
     float tx = *this->_COEFF_XA * rawX + *this->_COEFF_XB * rawY + *this->_COEFF_XC;
     float ty = *this->_COEFF_YA * rawX + *this->_COEFF_YB * rawY + *this->_COEFF_YC;
+    this->transform(tx, ty);
+
     if (*this->_LAST_X != -1) {
-        tx = 0.7f * *this->_LAST_X + 0.3f * tx;
-        ty = 0.7f * *this->_LAST_Y + 0.3f * ty;
+        float dx = fabs(tx - *this->_LAST_X);
+        float dy = fabs(ty - *this->_LAST_Y);
+        float alpha = (dx > 10 || dy > 10) ? 0.5f : 0.2f;
+        tx = (1 - alpha) * *this->_LAST_X + alpha * tx;
+        ty = (1 - alpha) * *this->_LAST_Y + alpha * ty;
     }
 
-    int newX = constrain((int)(tx + 0.5f), 0, *_SCREEN_WIDTH);
-    int newY = constrain((int)(ty + 0.5f), 0, *_SCREEN_HEIGHT);
+    int newX = constrain((int)(tx + 0.5f), 0, *this->_SCREEN_WIDTH - 1);
+    int newY = constrain((int)(ty + 0.5f), 0, *this->_SCREEN_HEIGHT - 1);
     if (newX <= 1 && newY <= 1)
         { return false; }
 
-    const int threshold = (*this->_LAST_X == -1) ? 0 : 3;
+    const int threshold = (*this->_LAST_X == -1) ? 0 : 2;
     if (abs(newX - *this->_LAST_X) < threshold && abs(newY - *this->_LAST_Y) < threshold) {
         x = *this->_LAST_X;
         y = *this->_LAST_Y;
@@ -241,6 +279,9 @@ bool MSP4021::TRead(int &x, int &y, bool antiSmoothing) {
 bool MSP4021::TCalibrate() {
     *this->_LAST_X = -1;
     *this->_LAST_Y = -1;
+
+    int userRotation = *this->_SCREEN_ROTATION;
+    this->setRotation();
 
     this->fillScreen(this->rgb(0, 0, 0));
     this->detectOrientation();
@@ -262,24 +303,28 @@ bool MSP4021::TCalibrate() {
         rx[i] = (float)tx;
         ry[i] = (float)ty;
 
+        this->rect(sx[i], sy[i], 20, 20, this->rgb(0, 255, 0));
+        delay(250);
         this->rect(sx[i], sy[i], 20, 20, this->rgb(0, 0, 0));
     }
     for (int i = 0; i < count; i++) {
         if (isnan(rx[i]) || isnan(ry[i]))
             { return false; }
     }
-    return this->affineCalibration(sx, sy, rx, ry, count);
+
+    this->setRotation();
+    bool toReturn = this->affineCalibration(sx, sy, rx, ry, count);
+    this->setRotation(userRotation);
+    return toReturn;
 }
 
 void MSP4021::TCalibrate(bool swapXY, bool invertX, bool invertY, float CXA, float CXB, float CXC, float CYA, float CYB, float CYC) {
     *this->_SWAP_XY = swapXY;
     *this->_INVERT_X = invertX;
     *this->_INVERT_Y = invertY;
-
     *this->_COEFF_XA = CXA;
     *this->_COEFF_XB = CXB;
     *this->_COEFF_XC = CXC;
-
     *this->_COEFF_YA = CYA;
     *this->_COEFF_YB = CYB;
     *this->_COEFF_YC = CYC;

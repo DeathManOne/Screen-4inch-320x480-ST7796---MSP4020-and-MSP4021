@@ -146,11 +146,11 @@ void MSP4020::init() {
 
 void MSP4020::transactionBegin() {
     this->_SPI->beginTransaction(*this->_SETTINGS);
-    this->CS_LOW();
+    this->start();
 }
 
 void MSP4020::transactionEnd() {
-    this->CS_HIGH();
+    this->stop();
     this->_SPI->endTransaction();
 }
 
@@ -196,7 +196,10 @@ void MSP4020::swapBuffers() {
 }
 
 void MSP4020::setRotation(int rotation) {
-  *this->_SCREEN_ROTATION = (rotation % 4 + 4) % 4;
+  rotation = (rotation % 4 + 4) % 4;
+  if (*this->_SCREEN_ROTATION == rotation)
+    { return; }
+  *this->_SCREEN_ROTATION = rotation;
 
   uint8_t d;
   switch (*this->_SCREEN_ROTATION) {
