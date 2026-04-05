@@ -43,8 +43,11 @@
 ```c++
 _TFT->TCalibrate(swapXY, invertX, invertY, coeffXA, coeffXB, coeffXC, coeffYA, coeffYB, coeffYC);
 ```
-#### AUTO-CALIBRATE (with save)
+#### CALIBRATE (with save)
+- Do `setRotation` **BEFORE** a `TCalibrate`
 ```c++
+int rotation = 3 // between 0 and 3
+_TFT->setRotation(3);
 while (!_TFT->TCalibrate());
 /** IN ORDER TO SAVE CALIBRATION
   * _TFT->TGetInvertX(); // bool
@@ -59,7 +62,7 @@ while (!_TFT->TCalibrate());
   * _TFT->TGetCoeffYC(); // float
   */
 ```
-### STOP SPI (for a time)
+### STOP SPI (for a time if needed)
 ```c++
 bool TUsed = _TFT->TUsed();
 if (TUsed)
