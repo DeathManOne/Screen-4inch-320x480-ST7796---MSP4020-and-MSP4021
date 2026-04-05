@@ -19,8 +19,8 @@ void MSP4020::rect(int x, int y, int width, int height, uint16_t color) {
     if ((height + y) > *this->_SCREEN_HEIGHT)
         { height = height - y; }
 
-    this->transactionBegin();
-    this->setAddress(x, y, x + width - 1, y + height - 1);
+    this->_transactionBegin();
+    this->_setAddress(x, y, x + width - 1, y + height - 1);
 
     uint32_t c = (color << 16) | color;
     for (int i = 0; i < MSP4020::_BUFFER_SIZE / 2; i++)
@@ -34,12 +34,12 @@ void MSP4020::rect(int x, int y, int width, int height, uint16_t color) {
                 { this->_BUFFER_CPU[i] = color; }
         }
 
-        this->writeData((uint8_t*)this->_BUFFER_CPU, chunk * 2);
+        this->_writeData((uint8_t*)this->_BUFFER_CPU, chunk * 2);
         total -= chunk;
         if (total > 0)
-            { this->swapBuffers(); }
+            { this->_swapBuffers(); }
     }
-    this->transactionEnd();
+    this->_transactionEnd();
 }
 
 void MSP4020::lineH(int x, int y, int width, uint16_t color) {
@@ -57,16 +57,16 @@ void MSP4020::lineH(int x, int y, int width, uint16_t color) {
     for (int i = 0; i < width / 2; i++)
         { ((uint32_t*)this->_BUFFER_CPU)[i] = c; }
 
-    this->transactionBegin();
-    this->setAddress(x, y, x + width - 1, y);
+    this->_transactionBegin();
+    this->_setAddress(x, y, x + width - 1, y);
 
     int remaining = width;
     while (remaining > 0) {
         int chunk = (remaining > MSP4020::_BUFFER_SIZE) ? MSP4020::_BUFFER_SIZE : remaining;
-        this->writeData((uint8_t*)this->_BUFFER_CPU, chunk * 2);
+        this->_writeData((uint8_t*)this->_BUFFER_CPU, chunk * 2);
         remaining -= chunk;
     }
-    this->transactionEnd();
+    this->_transactionEnd();
 }
 
 void MSP4020::lineV(int x, int y, int height, uint16_t color) {
@@ -84,16 +84,16 @@ void MSP4020::lineV(int x, int y, int height, uint16_t color) {
     for (int i = 0; i < MSP4020::_BUFFER_SIZE / 2; i++)
         { ((uint32_t*)this->_BUFFER_CPU)[i] = c; }
 
-    this->transactionBegin();
-    this->setAddress(x, y, x, y + height - 1);
+    this->_transactionBegin();
+    this->_setAddress(x, y, x, y + height - 1);
 
     int remaining = height;
     while (remaining > 0) {
         int chunk = (remaining > MSP4020::_BUFFER_SIZE) ? MSP4020::_BUFFER_SIZE : remaining;
-        this->writeData((uint8_t*)this->_BUFFER_CPU, chunk * 2);
+        this->_writeData((uint8_t*)this->_BUFFER_CPU, chunk * 2);
         remaining -= chunk;
     }
-    this->transactionEnd();
+    this->_transactionEnd();
 }
 
 void MSP4020::rectf(int x, int y, int width, int height, uint16_t color) {

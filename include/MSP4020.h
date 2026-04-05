@@ -12,17 +12,17 @@ namespace ST7796S {
             uint16_t _BUFFER_A[_BUFFER_SIZE], _BUFFER_B[_BUFFER_SIZE];
             uint16_t *_BUFFER_CPU = _BUFFER_A, *_BUFFER_DMA = _BUFFER_B;
             SPISettings *_SETTINGS;
-            inline void start()  { digitalWrite(*this->_PIN_CS, LOW); }
-            inline void stop() { digitalWrite(*this->_PIN_CS, HIGH); }
-            inline void DC_CMD()  { digitalWrite(*this->_PIN_DC, LOW); }
-            inline void DC_DATA() { digitalWrite(*this->_PIN_DC, HIGH); }
-            void init();
-            void transactionBegin();
-            void transactionEnd();
-            void writeCmd(uint8_t cmd);
-            void writeData(const uint8_t *data, int length);
-            void setAddress(int x0, int y0, int x1, int y1);
-            void swapBuffers();
+            inline void _start() { digitalWrite(*this->_PIN_CS, LOW); }
+            inline void _stop() { digitalWrite(*this->_PIN_CS, HIGH); }
+            inline void _DC_CMD() { digitalWrite(*this->_PIN_DC, LOW); }
+            inline void _DC_DATA() { digitalWrite(*this->_PIN_DC, HIGH); }
+            void _init();
+            void _transactionBegin();
+            void _transactionEnd();
+            void _writeCmd(uint8_t cmd);
+            void _writeData(const uint8_t *data, int length);
+            void _setAddress(int x0, int y0, int x1, int y1);
+            void _swapBuffers();
         protected:
             int *_SCREEN_WIDTH, *_SCREEN_HEIGHT, *_SCREEN_ROTATION;
             SPIClass *_SPI;

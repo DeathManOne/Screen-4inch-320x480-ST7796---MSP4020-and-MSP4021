@@ -17,19 +17,19 @@ void setup() {
   SPI.begin();
 
   _TFT = new ST7796S::MSP4021(SPI, TOUCH_CS, TFT_CS, TFT_DC, SCREEN_WIDTH, SCREEN_HEIGHT, TFT_RST);
-  _TFT->setRotation(2);
+  _TFT->setRotation(3);
   while (!_TFT->TCalibrate());
   _TFT->fillScreen(_TFT->rgb(0, 0, 0));
 }
 
 void loop() {
-  delay(500);
-
   int x=0, y=0;
   bool antiSmoothing = true; // optional | default = true
-  if (_TFT->TRead(x, y, antiSmoothing)) {
-    _TFT->rect(x, y, 20, 20, _TFT->rgb(0, 255, 0));
-    delay(1500);
-    _TFT->rect(x, y, 20, 20, _TFT->rgb(0, 0, 0));
-  }
+
+  do { delay(500); }
+  while (!_TFT->TRead(x, y, antiSmoothing));
+
+  _TFT->rect(x, y, 20, 20, _TFT->rgb(0, 255, 0));
+  delay(1500);
+  _TFT->rect(x, y, 20, 20, _TFT->rgb(0, 0, 0));
 }

@@ -38,7 +38,7 @@ MSP4021::~MSP4021() {
     delete this->_COEFF_YC;
 }
 
-uint16_t MSP4021::readRaw(uint8_t cmd) {
+uint16_t MSP4021::_readRaw(uint8_t cmd) {
     this->TStart();
     this->_SPI->transfer(cmd);
     uint8_t high = this->_SPI->transfer(0x00);
@@ -47,12 +47,12 @@ uint16_t MSP4021::readRaw(uint8_t cmd) {
     return ((high << 8) | low) >> 3;
 }
 
-uint16_t MSP4021::readAverage(uint8_t cmd) {
+uint16_t MSP4021::_readAverage(uint8_t cmd) {
     const int N = 15;
     uint16_t v[N];
 
     for (int i = 0; i < N; i++) {
-        v[i] = this->readRaw(cmd);
+        v[i] = this->_readRaw(cmd);
         delayMicroseconds(15);
     }
 
@@ -72,24 +72,24 @@ uint16_t MSP4021::readAverage(uint8_t cmd) {
     return sum / 7;
 }
 
-uint16_t MSP4021::readPressure() {
-    uint16_t z1 = this->readRaw(0xB0);
-    uint16_t z2 = this->readRaw(0xC0);
+uint16_t MSP4021::_readPressure() {
+    uint16_t z1 = this->_readRaw(0xB0);
+    uint16_t z2 = this->_readRaw(0xC0);
 
     if (z1 == 0)
         { return 0; }
     return z2 - z1;
 }
 
-void MSP4021::waitForTouch(uint16_t &x, uint16_t &y) {
+void MSP4021::_waitForTouch(uint16_t &x, uint16_t &y) {
     const int stabilityThreshold = 15;
 
     while (true) {
         uint16_t samplesX[5], samplesY[5];
 
         for (int i = 0; i < 5; i++) {
-            samplesX[i] = this->readAverage(0x90);
-            samplesY[i] = this->readAverage(0xD0);
+            samplesX[i] = this->_readAverage(0x90);
+            samplesY[i] = this->_readAverage(0xD0);
             delay(5);
         }
 
@@ -103,7 +103,7 @@ void MSP4021::waitForTouch(uint16_t &x, uint16_t &y) {
         uint16_t avgY = sumY / 5;
         if (avgX < 200 || avgX > 3900 || avgY < 200 || avgY > 3900)
             { continue; }
-        if (this->readPressure() < 50)
+        if (this->_readPressure() < 50)
             { continue; }
 
         bool stable = true;
@@ -115,7 +115,7 @@ void MSP4021::waitForTouch(uint16_t &x, uint16_t &y) {
             }
         }
 
-        if (!stable || !this->isTouched())
+        if (!stable || !this->_isTouched())
             { continue;} 
         x = avgX;
         y = avgY;
@@ -123,51 +123,43 @@ void MSP4021::waitForTouch(uint16_t &x, uint16_t &y) {
     }
 }
 
-void MSP4021::waitRelease() {
+void MSP4021::_waitRelease() {
     while (true) {
-        uint16_t x1 = this->readAverage(0x90);
-        uint16_t y1 = this->readAverage(0xD0);
+        uint16_t x1 = this->_readAverage(0x90);
+        uint16_t y1 = this->_readAverage(0xD0);
 
         delay(10);
 
-        uint16_t x2 = this->readAverage(0x90);
-        uint16_t y2 = this->readAverage(0xD0);
+        uint16_t x2 = this->_readAverage(0x90);
+        uint16_t y2 = this->_readAverage(0xD0);
 
         if (abs((int)x1 - (int)x2) > 40 || abs((int)y1 - (int)y2) > 40)
             { return; }
     }
 }
 
-bool MSP4021::isTouched() {
-    return this->readPressure() > 30;
+bool MSP4021::_isTouched() {
+    return this->_readPressure() > 30;
 }
 
-void MSP4021::drawCalibrationPoint(int x, int y, uint16_t &rx, uint16_t &ry) {
+void MSP4021::_drawCalibrationPoint(int x, int y, uint16_t &rx, uint16_t &ry) {
     const int size = 20;
 
     this->rect(x, y, size, size, this->rgb(255, 0, 0));
-    this->waitForTouch(rx, ry);
-    this->waitRelease();
+    delay(80);
+    this->_waitForTouch(rx, ry);
+    this->_waitRelease();
 
     this->rect(x, y, size, size, this->rgb(0, 255, 0));
     delay(250);
     this->rect(x, y, size, size, this->rgb(0, 0, 0));
 }
 
-void MSP4021::applyOrientation(uint16_t &x, uint16_t &y) {
-    if (*this->_SWAP_XY)
-        { std::swap(x,y); }
-    if (*this->_INVERT_X)
-        { x = 4095 - x; }
-    if (*this->_INVERT_Y)
-        { y = 4095 - y; }
-}
-
-void MSP4021::detectOrientation() {
+void MSP4021::_detectOrientation() {
     uint16_t x[3], y[3];
-    this->drawCalibrationPoint(0, 0, x[0], y[0]);
-    this->drawCalibrationPoint(*this->_SCREEN_WIDTH - 20, 0, x[1], y[1]);
-    this->drawCalibrationPoint(0, *this->_SCREEN_HEIGHT - 20, x[2], y[2]);
+    this->_drawCalibrationPoint(0, 0, x[0], y[0]);
+    this->_drawCalibrationPoint(*this->_SCREEN_WIDTH - 20, 0, x[1], y[1]);
+    this->_drawCalibrationPoint(0, *this->_SCREEN_HEIGHT - 20, x[2], y[2]);
 
     int dx_h = abs((int)x[1] - (int)x[0]);
     int dy_h = abs((int)y[1] - (int)y[0]);
@@ -184,28 +176,146 @@ void MSP4021::detectOrientation() {
     *this->_INVERT_Y = y[2] < y[0];
 }
 
-bool MSP4021::affineCalibration(float *sx, float *sy, float *rx, float *ry, int count) {
-    float x1 = rx[0], y1 = ry[0];
-    float x2 = rx[1], y2 = ry[1];
-    float x3 = rx[2], y3 = ry[2];
-    float X1 = sx[0], Y1 = sy[0];
-    float X2 = sx[1], Y2 = sy[1];
-    float X3 = sx[2], Y3 = sy[2];
-    float det = (x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2));
+void MSP4021::_applyOrientation(uint16_t &x, uint16_t &y) {
+    if (*this->_SWAP_XY)
+        { std::swap(x,y); }
+    if (*this->_INVERT_X)
+        { x = 4095 - x; }
+    if (*this->_INVERT_Y)
+        { y = 4095 - y; }
+}
+
+bool MSP4021::_affineCalibration(float *sx, float *sy, float *rx, float *ry, int count) {
+    float sum_x = 0;
+    float sum_y = 0;
+    float sum_1 = 0;
+    float sum_xx = 0;
+    float sum_yy = 0;
+    float sum_xy = 0;
+    float sum_X = 0;
+    float sum_Y = 0;
+    float sum_xX = 0;
+    float sum_yX = 0;
+    float sum_xY = 0;
+    float sum_yY = 0;
+
+    float cx = 0, cy = 0;
+    int valid = 0;
+    for (int i = 0; i < count; i++) {
+        float x = rx[i];
+        float y = ry[i];
+
+        if (x < 150 || x > 3950 || y < 150 || y > 3950)
+            { continue; }
+        cx += x;
+        cy += y;
+        valid++;
+    }
+
+    if (valid < 3)
+        { return false; }
+    cx /= valid;
+    cy /= valid;
+
+    for (int i = 0; i < count; i++) {
+        float x = rx[i];
+        float y = ry[i];
+        float X = sx[i];
+        float Y = sy[i];
+        if (x < 150 || x > 3950 || y < 150 || y > 3950)
+            { continue; }
+
+        float weight = 1.0f;
+        if (i == 4)
+            { weight = 3.0f; }
+        else if (i == 0 || i == 2 || i == 6 || i == 8)
+            { weight = 1.5f; }
+        else
+             { weight = 2.0f; }
+        float dx = x - cx;
+        float dy = y - cy;
+        float dist = sqrtf(dx * dx + dy * dy);
+        if (dist < 1.0f)
+            { dist = 1.0f; }
+
+        weight *= 1.0f + (dist / (5000.0f + dist));
+        if (weight > 4.0f)
+            { weight = 4.0f; }
+        sum_1 += weight;
+
+        sum_x  += weight * x;
+        sum_y  += weight * y;
+        sum_xx += weight * x * x;
+        sum_yy += weight * y * y;
+        sum_xy += weight * x * y;
+
+        sum_X  += weight * X;
+        sum_Y  += weight * Y;
+
+        sum_xX += weight * x * X;
+        sum_yX += weight * y * X;
+
+        sum_xY += weight * x * Y;
+        sum_yY += weight * y * Y;
+    }
+
+    if (sum_1 < 1e-6f)
+        { return false; }
+    float inv = 1.0f / sum_1;
+    sum_x  *= inv;
+    sum_y  *= inv;
+    sum_xx *= inv;
+    sum_yy *= inv;
+    sum_xy *= inv;
+    sum_X  *= inv;
+    sum_Y  *= inv;
+    sum_xX *= inv;
+    sum_yX *= inv;
+    sum_xY *= inv;
+    sum_yY *= inv;
+    sum_1 = 1.0f;
+    float det = sum_xx * (sum_yy * sum_1 - sum_y * sum_y)
+              - sum_xy * (sum_xy * sum_1 - sum_y * sum_x)
+              + sum_x  * (sum_xy * sum_y - sum_yy * sum_x);
 
     if (fabs(det) < 1e-6)
         { return false; }
-    *this->_COEFF_XA = (X1*(y2 - y3) + X2*(y3 - y1) + X3*(y1 - y2)) / det;
-    *this->_COEFF_XB = (X1*(x3 - x2) + X2*(x1 - x3) + X3*(x2 - x1)) / det;
-    *this->_COEFF_XC = (X1*(x2*y3 - x3*y2) + X2*(x3*y1 - x1*y3) + X3*(x1*y2 - x2*y1)) / det;
-    *this->_COEFF_YA = (Y1*(y2 - y3) + Y2*(y3 - y1) + Y3*(y1 - y2)) / det;
-    *this->_COEFF_YB = (Y1*(x3 - x2) + Y2*(x1 - x3) + Y3*(x2 - x1)) / det;
-    *this->_COEFF_YC = (Y1*(x2*y3 - x3*y2) + Y2*(x3*y1 - x1*y3) + Y3*(x1*y2 - x2*y1)) / det;
+
+    *this->_COEFF_XA = (
+        sum_xX * (sum_yy * sum_1 - sum_y * sum_y)
+        - sum_yX * (sum_xy * sum_1 - sum_y * sum_x)
+        + sum_X  * (sum_xy * sum_y - sum_yy * sum_x))
+        / det;
+    *this->_COEFF_XB = (
+        sum_xx * (sum_yX * sum_1 - sum_y * sum_X)
+        - sum_xy * (sum_xX * sum_1 - sum_x * sum_X)
+        + sum_x  * (sum_xX * sum_y - sum_yX * sum_x))
+        / det;
+    *this->_COEFF_XC = (
+        sum_xx * (sum_yy * sum_X - sum_y * sum_yX)
+        - sum_xy * (sum_xy * sum_X - sum_y * sum_xX)
+        + sum_x  * (sum_xy * sum_yX - sum_yy * sum_xX))
+        / det;
+    *this->_COEFF_YA = (
+        sum_xY * (sum_yy * sum_1 - sum_y * sum_y)
+        - sum_yY * (sum_xy * sum_1 - sum_y * sum_x)
+        + sum_Y  * (sum_xy * sum_y - sum_yy * sum_x))
+        / det;
+    *this->_COEFF_YB = (
+        sum_xx * (sum_yY * sum_1 - sum_y * sum_Y)
+        - sum_xy * (sum_xY * sum_1 - sum_x * sum_Y)
+        + sum_x  * (sum_xY * sum_y - sum_yY * sum_x))
+        / det;
+    *this->_COEFF_YC = (
+        sum_xx * (sum_yy * sum_Y - sum_y * sum_yY)
+        - sum_xy * (sum_xy * sum_Y - sum_y * sum_xY)
+        + sum_x  * (sum_xy * sum_yY - sum_yy * sum_xY))
+        / det;
     return true;
 }
 
-void MSP4021::transform(float &x, float &y) {
-  int tmp;
+void MSP4021::_transform(float &x, float &y) {
+  float tmp;
   switch (*this->_SCREEN_ROTATION) {
     case 1:
         tmp = x;
@@ -232,23 +342,21 @@ bool MSP4021::TRead(int &x, int &y, bool antiSmoothing) {
         *this->_LAST_Y = -1;
     }
 
-    uint16_t pressure = this->readPressure();
+    uint16_t pressure = this->_readPressure();
     if (pressure < 60) {
         *this->_LAST_X = -1;
         *this->_LAST_Y = -1;
         return false;
     }
 
-    uint16_t rawX = this->readAverage(0x90);
-    uint16_t rawY = this->readAverage(0xD0);
+    uint16_t rawX = this->_readAverage(0x90);
+    uint16_t rawY = this->_readAverage(0xD0);
     if (rawX < 50 || rawY < 50)
         { return false; }
-    this->applyOrientation(rawX, rawY);
+    this->_applyOrientation(rawX, rawY);
 
     float tx = *this->_COEFF_XA * rawX + *this->_COEFF_XB * rawY + *this->_COEFF_XC;
     float ty = *this->_COEFF_YA * rawX + *this->_COEFF_YB * rawY + *this->_COEFF_YC;
-    this->transform(tx, ty);
-
     if (*this->_LAST_X != -1) {
         float dx = fabs(tx - *this->_LAST_X);
         float dy = fabs(ty - *this->_LAST_Y);
@@ -281,41 +389,38 @@ bool MSP4021::TCalibrate() {
     *this->_LAST_Y = -1;
 
     int userRotation = *this->_SCREEN_ROTATION;
-    this->setRotation();
-
     this->fillScreen(this->rgb(0, 0, 0));
-    this->detectOrientation();
+    this->setRotation();
+    this->_detectOrientation();
+    this->setRotation(userRotation);
 
-    const int count = 5;
-    float sx[count] = {20, 300, 300, 20, 160};
-    float sy[count] = {20, 20, 460, 460, 240};
+    int count = 9;
+    float width = *this->_SCREEN_WIDTH;
+    float height = *this->_SCREEN_HEIGHT;
+    float sx[count] = {
+        20, width / 2, width - 20,
+        20, width / 2, width - 20,
+        20, width / 2, width - 20
+    };
+    float sy[count] = {
+        20, 20, 20,
+        height / 2,  height / 2,  height / 2,
+        height - 20, height - 20, height - 20
+    };
+
     float rx[count], ry[count];
-
     for (int i = 0; i < count; i++) {
-        this->rect(sx[i], sy[i], 20, 20, this->rgb(255, 0, 0));
-        delay(800);
-
         uint16_t tx, ty;
-        this->waitForTouch(tx, ty);
-        this->waitRelease();
-
-        this->applyOrientation(tx, ty);
+        this->_drawCalibrationPoint(sx[i], sy[i], tx, ty);
+        this->_applyOrientation(tx, ty);
         rx[i] = (float)tx;
         ry[i] = (float)ty;
-
-        this->rect(sx[i], sy[i], 20, 20, this->rgb(0, 255, 0));
-        delay(250);
-        this->rect(sx[i], sy[i], 20, 20, this->rgb(0, 0, 0));
     }
     for (int i = 0; i < count; i++) {
         if (isnan(rx[i]) || isnan(ry[i]))
             { return false; }
     }
-
-    this->setRotation();
-    bool toReturn = this->affineCalibration(sx, sy, rx, ry, count);
-    this->setRotation(userRotation);
-    return toReturn;
+    return this->_affineCalibration(sx, sy, rx, ry, count);
 }
 
 void MSP4021::TCalibrate(bool swapXY, bool invertX, bool invertY, float CXA, float CXB, float CXC, float CYA, float CYB, float CYC) {
