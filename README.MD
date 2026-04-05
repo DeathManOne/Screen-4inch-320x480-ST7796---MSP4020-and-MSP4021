@@ -5,6 +5,7 @@
 - [UserManual](https://www.lcdwiki.com/res/MSP4021/4.0inch_SPI_Module_MSP4020&MSP4021_User_Manual_EN.pdf)
 ## NEXT STEP
 - add fonts
+- add comments
 ## WHAT IS WHAT
 - **MSP4020** -> `screen` only
 - **MSP4021** -> `MSP4020` + `TouchScreen`
