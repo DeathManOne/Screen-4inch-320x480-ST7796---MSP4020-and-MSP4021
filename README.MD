@@ -36,7 +36,8 @@
 | :------- | :-------------------------- | :----------------------------------------------------------- |
 | Screen   | `tests/screen.ino`          | check whether your screen works and well connected           |
 | rotation | `tests/screen_rotation.ino` | check rotation with point 0-0 and point maxX-maxY            |
-| Touch    | `tests/touch.ino`           | check whether your Touch and screen works and well connected |
+| Touch_1  | `tests/touch_1.ino`         | check whether your Touch and screen works and well connected |
+| Touch_2  | `tests/touch_2.ino`         | same than touch_1 with maybe a better using (do/while)       |
 ## TOUCH
 ### CALIBRATE
 #### FROM SAVED FILE
@@ -72,4 +73,28 @@ if (TUsed)
 //
 if (TUsed)
   { _TFT->TStart(); }
+```
+### READ TOUCH
+#### NOT LOOPED
+```c++
+int x=0, y=0;
+bool antiSmoothing = true; // optional | default = true
+
+if (_TFT->TRead(x, y, antiSmoothing)) {
+  _TFT->rect(x, y, 20, 20, _TFT->rgb(0, 255, 0));
+  delay(1500);
+  _TFT->rect(x, y, 20, 20, _TFT->rgb(0, 0, 0));
+}
+```
+#### LOOPED
+```c++
+int x=0, y=0;
+bool antiSmoothing = true; // optional | default = true
+
+do { delay(500); }
+while (!_TFT->TRead(x, y, antiSmoothing));
+
+_TFT->rect(x, y, 20, 20, _TFT->rgb(0, 255, 0));
+delay(1500);
+_TFT->rect(x, y, 20, 20, _TFT->rgb(0, 0, 0));
 ```
