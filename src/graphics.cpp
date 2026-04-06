@@ -1,6 +1,102 @@
 #include "../include/MSP4020.h"
 using namespace ST7796S;
 
+void MSP4020::setFont(const Font& font) {
+    this->_FONT = &font;
+}
+
+void MSP4020::setTextColor(uint16_t color) {
+    uint8_t r = (color >> 11) & 0x1F;
+    uint8_t g = (color >> 5) & 0x3F;
+    uint8_t b = color & 0x1F;
+    *this->_TEXT_COLOR = (g << 11) | (b << 5) | r;
+}
+
+void MSP4020::setTextScale(uint8_t scale) {
+    *this->_TEXT_SCALE = (scale < 1) ? 1 : scale;
+}
+
+const uint32_t* MSP4020::_getCharBitmap(uint8_t myChar) {
+    if (!this->_FONT)
+        { return nullptr; }
+    if (myChar < this->_FONT->firstChar || myChar > this->_FONT->lastChar)
+        { return nullptr; }
+    uint16_t index = (myChar - this->_FONT->firstChar) * this->_FONT->width;
+    return &((const uint32_t*)this->_FONT->data)[index];
+}
+
+void MSP4020::_drawChar(uint16_t x, uint16_t y, char myChar) {
+    if (!this->_FONT) return;
+
+    const uint32_t *bitmap = _getCharBitmap((uint8_t)myChar);
+    if (!bitmap) return;
+
+    uint8_t scale = *this->_TEXT_SCALE;
+
+    this->_transactionBegin();
+    for (uint8_t i = 0; i < this->_FONT->width; i++) {
+        uint32_t col = pgm_read_dword(&bitmap[i]);
+        for (uint8_t j = 0; j < this->_FONT->height; j++) {
+            if (col & (1UL << j)) {
+                uint16_t px = x + i * scale;
+                uint16_t py = y + j * scale;
+                this->_setAddress(px, py, px + scale - 1, py + scale - 1);
+                uint8_t data[2] = {
+                    uint8_t((*this->_TEXT_COLOR) >> 8),
+                    uint8_t((*this->_TEXT_COLOR) & 0xFF)
+                };
+                for (uint8_t sx = 0; sx < scale * scale; sx++) {
+                    this->_writeData(data, 2);
+                }
+            }
+        }
+    }
+    this->_transactionEnd();
+}
+
+void MSP4020::drawString(uint16_t x, uint16_t y, const char* str) {
+    if (!this->_FONT || !str) return;
+
+    const uint32_t* fontData = this->_FONT->data;
+    const uint16_t* fontOffsets = this->_FONT->offsets; // tableau offset par char
+    const uint8_t* fontWidths = this->_FONT->widths;     // tableau largeur par char
+    uint8_t scale = *this->_TEXT_SCALE;
+
+    while (*str) {
+        uint8_t myChar = (uint8_t)*str;
+        if (myChar < this->_FONT->firstChar || myChar > this->_FONT->lastChar)
+            myChar = '?';
+
+        uint16_t charIndex = myChar - this->_FONT->firstChar;
+        uint16_t charWidth = fontWidths[charIndex];
+        uint16_t charOffset = fontOffsets[charIndex];
+        
+        // === DRAW CHAR ===
+        this->_transactionBegin();
+        for (uint16_t i = 0; i < charWidth; i++) {
+            uint32_t col = pgm_read_dword(&fontData[charOffset + i]);
+            for (uint16_t j = 0; j < this->_FONT->height; j++) {
+                if (col & (1UL << j)) {
+                    uint16_t px = x + i * scale;
+                    uint16_t py = y + j * scale;
+                    this->_setAddress(px, py, px + scale - 1, py + scale - 1);
+                    uint8_t data[2] = {
+                        uint8_t((*this->_TEXT_COLOR) >> 8),
+                        uint8_t((*this->_TEXT_COLOR) & 0xFF)
+                    };
+                    for (uint16_t sx = 0; sx < scale * scale; sx++)
+                        this->_writeData(data, 2);
+                }
+            }
+        }
+        this->_transactionEnd();
+
+        // avancer x selon largeur réelle du caractère + 1px d’espacement
+        x += (charWidth + 1) * scale;
+        str++;
+    }
+}
+
 void MSP4020::rect(int x, int y, int width, int height, uint16_t color) {
     if (width <= 0 || height <= 0)
         { return; }
@@ -102,16 +198,6 @@ void MSP4020::rectf(int x, int y, int width, int height, uint16_t color) {
     this->lineV(x, y + 1, height - 1, color);
     this->lineV(x + width - 1, y, height - 1, color);
 }
-
-/*
-void MSP4021::drawText(int x,int y,const char* txt, uint16_t color) {
-    while(*txt) {
-        this->drawPixel(x,y,color);
-        x += 6;
-        txt++;
-    }
-}
-*/
 
 void MSP4020::drawButton(int x, int y, int width, int height, uint16_t color) {
     this->rect(x, y, width, height, color);

@@ -19,6 +19,10 @@ MSP4020::MSP4020(SPIClass &spi, int pinCS, int pinDC, int screenWidth, int scree
   }
   this->_SCREEN_ROTATION = new int(0);
 
+  this->_FONT = nullptr;
+  this->_TEXT_COLOR = new uint16_t(this->rgb(255, 255, 255));
+  this->_TEXT_SCALE = new uint8_t(1);
+
   this->_SPI = &spi;
   this->_SETTINGS = new SPISettings(4000000u, MSBFIRST, SPI_MODE0);
   
@@ -43,6 +47,9 @@ MSP4020::~MSP4020() {
   delete this->_SCREEN_ROTATION;
   delete this->_SPI;
   delete this->_SETTINGS;
+  delete this->_FONT;
+  delete this->_TEXT_COLOR;
+  delete this->_TEXT_SCALE;
 }
 
 void MSP4020::_init() {
@@ -145,16 +152,16 @@ void MSP4020::_setAddress(int x0, int y0, int x1, int y1) {
 
   this->_writeCmd(0x2A);
   d[0] = x0 >> 8;
-  d[1] = x0;
+  d[1] = x0 & 0xFF;
   d[2] = x1 >> 8;
-  d[3] = x1;
+  d[3] = x1 & 0xFF;
   this->_writeData(d,4);
 
   this->_writeCmd(0x2B);
   d[0] = y0 >> 8;
-  d[1] = y0;
+  d[1] = y0 & 0xFF;
   d[2] = y1 >> 8;
-  d[3] = y1;
+  d[3] = y1 & 0xFF;
   this->_writeData(d,4);
 
   this->_writeCmd(0x2C);

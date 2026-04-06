@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+#include "../fonts/font.h"
 
 namespace ST7796S {
     class MSP4020 {
@@ -12,6 +13,9 @@ namespace ST7796S {
             uint16_t _BUFFER_A[_BUFFER_SIZE], _BUFFER_B[_BUFFER_SIZE];
             uint16_t *_BUFFER_CPU = _BUFFER_A, *_BUFFER_DMA = _BUFFER_B;
             SPISettings *_SETTINGS;
+            const Font *_FONT;
+            uint8_t *_TEXT_SCALE;
+            uint16_t *_TEXT_COLOR;
             inline void _start() { digitalWrite(*this->_PIN_CS, LOW); }
             inline void _stop() { digitalWrite(*this->_PIN_CS, HIGH); }
             inline void _DC_CMD() { digitalWrite(*this->_PIN_DC, LOW); }
@@ -23,6 +27,8 @@ namespace ST7796S {
             void _writeData(const uint8_t *data, int length);
             void _setAddress(int x0, int y0, int x1, int y1);
             void _swapBuffers();
+            const uint32_t* _getCharBitmap(uint8_t myChar);
+            void _drawChar(uint16_t x, uint16_t y, char c);
         protected:
             int *_SCREEN_WIDTH, *_SCREEN_HEIGHT, *_SCREEN_ROTATION;
             SPIClass *_SPI;
@@ -33,12 +39,14 @@ namespace ST7796S {
             inline uint16_t rgb(uint8_t red, uint8_t green, uint8_t blue) { return ((blue & 0xF8) << 8) | ((red & 0xFC) << 3) | (green >> 3); }
             inline void fillScreen(uint16_t color) { this->rect(0, 0, *this->_SCREEN_WIDTH, *this->_SCREEN_HEIGHT, color); }
             void setRotation(int rotation = 0);
+            void setFont(const Font& font);
+            void setTextColor(uint16_t color);
+            void setTextScale(uint8_t scale);
+            void drawString(uint16_t x, uint16_t y, const char* str);
             void rect(int x, int y, int width, int height, uint16_t color);
             void lineH(int x, int y, int width, uint16_t color);
             void lineV(int x, int y, int height, uint16_t color);
             void rectf(int x, int y, int width, int height, uint16_t color);
-            //void drawText(int x, int y, const char* txt, uint16_t color);
-            //void drawPixel(uint16_t x, uint16_t y, uint16_t color);
             void drawButton(int x, int y, int width, int height, uint16_t color);
     };
 }
