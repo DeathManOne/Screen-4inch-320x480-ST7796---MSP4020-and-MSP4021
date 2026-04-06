@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <SPI.h>
-#include "../fonts/font.h"
+#include "../src/fonts/font.h"
 
 namespace ST7796S {
     class MSP4020 {
