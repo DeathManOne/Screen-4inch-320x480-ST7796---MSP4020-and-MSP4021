@@ -30,7 +30,7 @@ def print_line_preview(chars_imgs, width, height):
 def generate_font(font_path, size):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.dirname(script_dir)
-    output_dir = os.path.join(parent_dir, "fonts")
+    output_dir = os.path.join(parent_dir, "src", "fonts")
     os.makedirs(output_dir, exist_ok=True)
 
     font_name = os.path.splitext(os.path.basename(font_path))[0]
