@@ -35,15 +35,25 @@ for %%F in (%*) do (
     set "ext=!ext:~1!"
     set "ext=!ext!"
 
-    if /I "!ext!"=="ttf" (python "%~dp0font2h.py" "%%~fF")
-    else if /I "!ext!"=="otf" (python "%~dp0font2h.py" "%%~fF")
-    else if /I "!ext!"=="png" (python "%~dp0image2h.py" "%%~fF")
-    else if /I "!ext!"=="jpg" (python "%~dp0image2h.py" "%%~fF")
-    else if /I "!ext!"=="jpeg" (python "%~dp0image2h.py" "%%~fF")
-    else if /I "!ext!"=="bmp" (python "%~dp0image2h.py" "%%~fF")
-    else if /I "!ext!"=="webp" (python "%~dp0image2h.py" "%%~fF")
-    else if /I "!ext!"=="gif" (python "%~dp0image2h.py" "%%~fF")
-    else (echo Unsupported file: %%~nxF)
+    if /I "!ext!"=="ttf" (
+        python "%~dp0font2h.py" "%%~fF"
+    ) else if /I "!ext!"=="otf" (
+        python "%~dp0font2h.py" "%%~fF"
+    ) else if /I "!ext!"=="png" (
+        python "%~dp0image2h.py" "%%~fF"
+    ) else if /I "!ext!"=="jpg" (
+        python "%~dp0image2h.py" "%%~fF"
+    ) else if /I "!ext!"=="jpeg" (
+        python "%~dp0image2h.py" "%%~fF"
+    ) else if /I "!ext!"=="bmp" (
+        python "%~dp0image2h.py" "%%~fF"
+    ) else if /I "!ext!"=="webp" (
+        python "%~dp0image2h.py" "%%~fF"
+    ) else if /I "!ext!"=="gif" (
+        python "%~dp0image2h.py" "%%~fF"
+    ) else (
+        echo Unsupported file: %%~nxF
+    )
 )
 
 echo.
