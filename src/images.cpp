@@ -59,13 +59,13 @@ bool MSP4020::imageSD(int x, int y, Stream& file) {
     uint8_t hi = file.read();
     uint16_t w = lo | (hi << 8);
 
-    if (w > *this->_SCREEN_WIDTH * 4)
+    if (w > this->_SCREEN_WIDTH * 4)
         { return false; }
     lo = file.read();
     hi = file.read();
     uint16_t h = lo | (hi << 8);
 
-    if (h > *this->_SCREEN_HEIGHT * 4)
+    if (h > this->_SCREEN_HEIGHT * 4)
         { return false; }
     if (w == 0 || h == 0)
         { return false; }

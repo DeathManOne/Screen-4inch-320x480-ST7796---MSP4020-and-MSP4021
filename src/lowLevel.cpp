@@ -25,59 +25,37 @@
 using namespace ST7796S;
 
 MSP4020::MSP4020(SPIClass &spi, int pinCS, int pinDC, int screenWidth, int screenHeight, int pinRST) {
-    this->_PIN_CS = new int(pinCS);
-    this->_PIN_DC = new int(pinDC);
-    this->_PIN_RST = new int(pinRST);
+    this->_PIN_CS = pinCS;
+    this->_PIN_DC = pinDC;
+    this->_PIN_RST = pinRST;
 
-    this->_SCREEN_ROTATION = new int(0);
     if (screenWidth > screenHeight) {
-        this->_RAW_WIDTH = new int(screenHeight);
-        this->_RAW_HEIGHT = new int(screenWidth);
-        this->_SCREEN_WIDTH = new int(screenHeight);
-        this->_SCREEN_HEIGHT = new int(screenWidth);
+        this->_RAW_WIDTH = screenHeight;
+        this->_RAW_HEIGHT = screenWidth;
+        this->_SCREEN_WIDTH = screenHeight;
+        this->_SCREEN_HEIGHT = screenWidth;
     } else {
-        this->_RAW_WIDTH = new int(screenWidth);
-        this->_RAW_HEIGHT = new int(screenHeight);
-        this->_SCREEN_WIDTH = new int(screenWidth);
-        this->_SCREEN_HEIGHT = new int(screenHeight);
+        this->_RAW_WIDTH = screenWidth;
+        this->_RAW_HEIGHT = screenHeight;
+        this->_SCREEN_WIDTH = screenWidth;
+        this->_SCREEN_HEIGHT = screenHeight;
     }
 
-    this->_FONT = nullptr;
-    this->_TEXT_COLOR = new uint16_t(this->rgb(255, 255, 255));
-    this->_TEXT_SCALE = new uint8_t(1);
-
     this->_SPI = &spi;
-    this->_SETTINGS = new SPISettings(4000000u, MSBFIRST, SPI_MODE0);
-    
-    if (pinRST != -1)
-        { pinMode(pinRST, OUTPUT); }
-    pinMode(pinCS, OUTPUT);
-    pinMode(pinDC, OUTPUT);
-
+    if (this->_PIN_RST != -1)
+        { pinMode(this->_PIN_RST, OUTPUT); }
+    pinMode(this->_PIN_CS, OUTPUT);
+    pinMode(this->_PIN_DC, OUTPUT);
     this->_init();
 }
 
-MSP4020::~MSP4020() {
-    delete this->_PIN_CS;
-    delete this->_PIN_DC;
-    delete this->_PIN_RST;
-    delete this->_RAW_WIDTH;
-    delete this->_RAW_HEIGHT;
-    delete this->_SCREEN_WIDTH;
-    delete this->_SCREEN_HEIGHT;
-    delete this->_SCREEN_ROTATION;
-    delete this->_SETTINGS;
-    delete this->_TEXT_COLOR;
-    delete this->_TEXT_SCALE;
-}
-
 void MSP4020::_init() {
-    if (*this->_PIN_RST != -1) {
-        digitalWrite(*this->_PIN_RST, HIGH);
+    if (this->_PIN_RST != -1) {
+        digitalWrite(this->_PIN_RST, HIGH);
         delay(5);
-        digitalWrite(*this->_PIN_RST, LOW);
+        digitalWrite(this->_PIN_RST, LOW);
         delay(15);
-        digitalWrite(*this->_PIN_RST, HIGH);
+        digitalWrite(this->_PIN_RST, HIGH);
         delay(15);
     }
 
@@ -142,7 +120,7 @@ void MSP4020::_init() {
 }
 
 void MSP4020::_transactionBegin() {
-    this->_SPI->beginTransaction(*this->_SETTINGS);
+    this->_SPI->beginTransaction(this->_SETTINGS);
     this->_start();
 }
 
@@ -190,12 +168,12 @@ void MSP4020::_swapBuffers() {
 
 void MSP4020::setRotation(int rotation) {
     rotation = (rotation % 4 + 4) % 4;
-    if (*this->_SCREEN_ROTATION == rotation)
+    if (this->_SCREEN_ROTATION == rotation)
         { return; }
-    *this->_SCREEN_ROTATION = rotation;
+    this->_SCREEN_ROTATION = rotation;
 
     uint8_t d;
-    switch (*this->_SCREEN_ROTATION) {
+    switch (this->_SCREEN_ROTATION) {
         case 1:
         d = 0x28;
         break;
@@ -209,12 +187,12 @@ void MSP4020::setRotation(int rotation) {
         d = 0x48;
         break;
     }
-    if (*this->_SCREEN_ROTATION % 2 == 0) {
-        *this->_SCREEN_WIDTH = *this->_RAW_WIDTH;
-        *this->_SCREEN_HEIGHT = *this->_RAW_HEIGHT;
+    if (this->_SCREEN_ROTATION % 2 == 0) {
+        this->_SCREEN_WIDTH = this->_RAW_WIDTH;
+        this->_SCREEN_HEIGHT = this->_RAW_HEIGHT;
     } else {
-        *this->_SCREEN_WIDTH = *this->_RAW_HEIGHT;
-        *this->_SCREEN_HEIGHT = *this->_RAW_WIDTH;
+        this->_SCREEN_WIDTH = this->_RAW_HEIGHT;
+        this->_SCREEN_HEIGHT = this->_RAW_WIDTH;
     }
     this->_transactionBegin();
     this->_writeCmd(0x36);

@@ -51,7 +51,7 @@ void MSP4020::_char(uint16_t x, uint16_t y, uint16_t myChar) {
         }
     }
 
-    uint8_t scale = *this->_TEXT_SCALE;
+    uint8_t scale = this->_TEXT_SCALE;
     uint16_t w = pgm_read_byte(&this->_FONT->widths[iChar]);
     uint16_t h = pgm_read_byte(&this->_FONT->heights[iChar]);
     int8_t yOff = pgm_read_byte(&this->_FONT->yOffsets[iChar]);
@@ -68,8 +68,8 @@ void MSP4020::_char(uint16_t x, uint16_t y, uint16_t myChar) {
                 this->_setAddress(px, py, px+scale-1, py+scale-1);
 
                 uint8_t d[2] = {
-                    uint8_t((*this->_TEXT_COLOR) >> 8),
-                    uint8_t((*this->_TEXT_COLOR)&0xFF)
+                    uint8_t((this->_TEXT_COLOR) >> 8),
+                    uint8_t((this->_TEXT_COLOR)&0xFF)
                 };
                 for (uint16_t s=0; s<scale*scale; s++)
                     { this->_writeData(d, 2); }
@@ -116,7 +116,7 @@ void MSP4020::_charBounds(uint16_t c, int &w, int &h, int &yOff) {
 void MSP4020::text(uint16_t x, uint16_t y, const char* str) {
     if (!this->_FONT || !str)
         { return; }
-    uint8_t scale = *this->_TEXT_SCALE;
+    uint8_t scale = this->_TEXT_SCALE;
 
     while (*str) {
         uint16_t c;
@@ -166,7 +166,7 @@ void MSP4020::text(uint16_t x, uint16_t y, const char* str) {
 void MSP4020::textCenter(int x, int y, int w, int h, const char* str) {
     if (!this->_FONT || !str || !*str)
         { return; }
-    uint8_t scale = *this->_TEXT_SCALE;
+    uint8_t scale = this->_TEXT_SCALE;
 
     int totalWidth = 0;
     int maxHeight = 0;

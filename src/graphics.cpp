@@ -25,7 +25,7 @@
 using namespace ST7796S;
 
 void MSP4020::_pixel(int x, int y, uint16_t color) {
-    if (x < 0 || y < 0 || x >= *this->_SCREEN_WIDTH || y >= *this->_SCREEN_HEIGHT)
+    if (x < 0 || y < 0 || x >= this->_SCREEN_WIDTH || y >= this->_SCREEN_HEIGHT)
         { return; }
     this->_transactionBegin();
     this->_setAddress(x, y, x, y);
@@ -70,14 +70,14 @@ void MSP4020::_line(int x0, int y0, int x1, int y1, uint16_t color) {
 }
 
 void MSP4020::lineH(int x, int y, int width, uint16_t color) {
-    if (width <= 0 || y < 0 || y >= *this->_SCREEN_HEIGHT)
+    if (width <= 0 || y < 0 || y >= this->_SCREEN_HEIGHT)
         { return; }
     if (x < 0)
         { x = 0; }
-    if (width > *this->_SCREEN_WIDTH)
-        { width = *this->_SCREEN_WIDTH; }
-    if ((width + x) > *this->_SCREEN_WIDTH)
-        { width = width - x; }
+    if (width > this->_SCREEN_WIDTH)
+        { width = this->_SCREEN_WIDTH; }
+    if ((width + x) > this->_SCREEN_WIDTH)
+        { width = this->_SCREEN_WIDTH - x; }
     color = (color >> 8) | (color << 8);
 
     uint32_t c = ((uint32_t)color << 16) | color;
@@ -99,14 +99,14 @@ void MSP4020::lineH(int x, int y, int width, uint16_t color) {
 }
 
 void MSP4020::lineV(int x, int y, int height, uint16_t color) {
-    if (height <= 0 || x < 0 || x >= *this->_SCREEN_WIDTH)
+    if (height <= 0 || x < 0 || x >= this->_SCREEN_WIDTH)
         { return; }
     if (y < 0)
         { y = 0; }
-    if (height > *this->_SCREEN_HEIGHT)
-        { height = *this->_SCREEN_HEIGHT; }
-    if ((height + y) > *this->_SCREEN_HEIGHT)
-        { height = height - y; }
+    if (height > this->_SCREEN_HEIGHT)
+        { height = this->_SCREEN_HEIGHT; }
+    if ((height + y) > this->_SCREEN_HEIGHT)
+        { height = this->_SCREEN_HEIGHT - y; }
     color = (color >> 8) | (color << 8);
 
     uint32_t c = ((uint32_t)color << 16) | color;
@@ -192,7 +192,7 @@ void MSP4020::triangleFill(int x1, int y1, int x2, int y2, int x3, int y3, uint1
     };
 
     for (int y = y1; y <= y3; y++) {
-        if (y < 0 || y >= *this->_SCREEN_HEIGHT)
+        if (y < 0 || y >= this->_SCREEN_HEIGHT)
             { continue; }
 
         int xa = (y < y2)
@@ -218,17 +218,17 @@ void MSP4020::rectFill(int x, int y, int width, int height, uint16_t color) {
         { return; }
     if (x < 0)
         { x = 0; }
-    if (width > *this->_SCREEN_WIDTH)
-        { width = *this->_SCREEN_WIDTH; }
-    if ((width + x) > *this->_SCREEN_WIDTH)
-        { width = width - x; }
+    if (width > this->_SCREEN_WIDTH)
+        { width = this->_SCREEN_WIDTH; }
+    if ((width + x) > this->_SCREEN_WIDTH)
+        { width = this->_SCREEN_WIDTH - x; }
 
     if (y < 0)
         { y = 0; }
-    if (height > *this->_SCREEN_HEIGHT)
-        { height = *this->_SCREEN_HEIGHT; }
-    if ((height + y) > *this->_SCREEN_HEIGHT)
-        { height = height - y; }
+    if (height > this->_SCREEN_HEIGHT)
+        { height = this->_SCREEN_HEIGHT; }
+    if ((height + y) > this->_SCREEN_HEIGHT)
+        { height = this->_SCREEN_HEIGHT - y; }
     color = (color >> 8) | (color << 8);
 
     this->_transactionBegin();

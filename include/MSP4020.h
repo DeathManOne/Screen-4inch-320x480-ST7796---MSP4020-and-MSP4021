@@ -25,25 +25,33 @@
 #define _ST7796S_
 
 #include <Arduino.h>
+#include <algorithm>
+#include <cmath>
 #include <SPI.h>
-#include "../src/fonts/font.h"
-#include "../src/images/image.h"
+#include "fonts/font.h"
+#include "images/image.h"
 
 namespace ST7796S {
     class MSP4020 {
         private:
-            SPISettings *_SETTINGS;
-            int *_PIN_CS, *_PIN_DC, *_PIN_RST, *_RAW_WIDTH, *_RAW_HEIGHT;
+            SPISettings _SETTINGS = SPISettings(4000000u, MSBFIRST, SPI_MODE0);
+            int _PIN_CS = -1;
+            int _PIN_DC = -1;
+            int _PIN_RST = -1;
+            int _RAW_WIDTH = 380;
+            int _RAW_HEIGHT = 420;
             static const int _BUFFER_SIZE = 1024;
-            uint16_t _BUFFER_A[_BUFFER_SIZE], _BUFFER_B[_BUFFER_SIZE];
-            uint16_t *_BUFFER_CPU = _BUFFER_A, *_BUFFER_DMA = _BUFFER_B;
-            const Font *_FONT;
-            uint8_t *_TEXT_SCALE;
-            uint16_t *_TEXT_COLOR;
-            inline void _start() { digitalWrite(*this->_PIN_CS, LOW); }
-            inline void _stop() { digitalWrite(*this->_PIN_CS, HIGH); }
-            inline void _DC_CMD() { digitalWrite(*this->_PIN_DC, LOW); }
-            inline void _DC_DATA() { digitalWrite(*this->_PIN_DC, HIGH); }
+            uint16_t _BUFFER_A[_BUFFER_SIZE];
+            uint16_t _BUFFER_B[_BUFFER_SIZE];
+            uint16_t *_BUFFER_CPU = _BUFFER_A;
+            uint16_t *_BUFFER_DMA = _BUFFER_B;
+            const Font *_FONT = nullptr;
+            uint8_t _TEXT_SCALE = 1;
+            uint16_t _TEXT_COLOR = this->rgb(255, 255, 255);
+            inline void _start() { digitalWrite(this->_PIN_CS, LOW); }
+            inline void _stop() { digitalWrite(this->_PIN_CS, HIGH); }
+            inline void _DC_CMD() { digitalWrite(this->_PIN_DC, LOW); }
+            inline void _DC_DATA() { digitalWrite(this->_PIN_DC, HIGH); }
             void _init();
             void _transactionBegin();
             void _transactionEnd();
@@ -57,8 +65,10 @@ namespace ST7796S {
             void _charBounds(uint16_t c, int &w, int &h, int &yOff);
             void _image(int x, int y, int w, int h, const uint16_t* img);
         protected:
-            int *_SCREEN_WIDTH, *_SCREEN_HEIGHT, *_SCREEN_ROTATION;
-            SPIClass *_SPI;
+            int _SCREEN_WIDTH = this->_RAW_WIDTH;
+            int _SCREEN_HEIGHT = this->_RAW_HEIGHT;
+            int _SCREEN_ROTATION = 0;
+            SPIClass *_SPI = nullptr;
         public:
             /**
              * @brief Initializes the ST7796S TFT display driver.
@@ -85,7 +95,25 @@ namespace ST7796S {
             /**
              * @brief Destroys the TFT driver instance.
              */
-            ~MSP4020();
+            ~MSP4020() {}
+
+            /**
+             * @brief Returns the current screen width in pixels.
+             * 
+             * Value changes automatically with display rotation.
+             * 
+             * @return Current display width.
+             */
+            inline int width() const { return this->_SCREEN_WIDTH; }
+
+            /**
+             * @brief Returns the current screen height in pixels.
+             * 
+             * Value changes automatically with display rotation.
+             * 
+             * @return Current display height.
+             */
+            inline int height() const { return this->_SCREEN_HEIGHT; }
 
             /**
              * @brief Converts RGB888 color to RGB565 display format.
@@ -102,7 +130,7 @@ namespace ST7796S {
              * 
              * @param color RGB565 color.
              */
-            inline void fillScreen(uint16_t color) { this->rectFill(0, 0, *this->_SCREEN_WIDTH, *this->_SCREEN_HEIGHT, color); }
+            inline void fillScreen(uint16_t color) { this->rectFill(0, 0, this->_SCREEN_WIDTH, this->_SCREEN_HEIGHT, color); }
 
             /**
              * @brief Draws an image stored in flash memory.
@@ -125,14 +153,14 @@ namespace ST7796S {
              * 
              * @param color RGB565 color.
              */
-            inline void setTextColor(uint16_t color) { *this->_TEXT_COLOR = color; }
+            inline void setTextColor(uint16_t color) { this->_TEXT_COLOR = color; }
 
             /**
              * @brief Sets the current text scale factor.
              * 
              * @param scale Text scale multiplier.
              */
-            inline void setTextScale(uint8_t scale) { *this->_TEXT_SCALE = (scale < 1) ? 1 : scale; }
+            inline void setTextScale(uint8_t scale) { this->_TEXT_SCALE = (scale < 1) ? 1 : scale; }
 
             /**
              * @brief Sets the display rotation.

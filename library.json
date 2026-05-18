@@ -1,6 +1,6 @@
 {
   "name": "ST7796S - for MSP4020 and MSP4021",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "GPL-3.0-or-later",
   "keywords": "screen, clone, 4inch, 320x480, st7796, st7796s, msp4020, msp4021, esp, spi, arduino, xpt2046, tft, touch",
   "description": "Lightweight ST7796S TFT display library with XPT2046 touch support, virtual keyboard, UTF-8 text rendering, RGB565 images from flash or stream, and asset conversion tools.",
@@ -24,7 +24,11 @@
   "dependencies": {},
   "build": {
     "includeDir": "include",
-    "srcDir": "src"
+    "srcDir": "src",
+    "flags": [
+      "-I include/fonts",
+      "-I include/images"
+    ]
   },
   "examples": "tests"
 }

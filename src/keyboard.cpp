@@ -22,8 +22,8 @@
  */
 
 #include "../include/MSP4021.h"
-#include "fonts/DejaVuSans_Bold_16.h"
-#include "fonts/DejaVuSans_Bold_18.h"
+#include "../include/fonts/DejaVuSans_Bold_16.h"
+#include "../include/fonts/DejaVuSans_Bold_18.h"
 using namespace ST7796S;
 
 static const char* rowsUpperLandscape[] = {
@@ -87,7 +87,7 @@ void MSP4021::_KDraw() {
     int rowsCount, keyboardHeight, startY;
 
     this->_KLayoutMetrics(rowsCount, keyboardHeight, startY);
-    this->rectFill( 0, 120, *this->_SCREEN_WIDTH, *this->_SCREEN_HEIGHT - 120, this->rgb(0, 0, 0));
+    this->rectFill( 0, 120, this->_SCREEN_WIDTH, this->_SCREEN_HEIGHT - 120, this->rgb(0, 0, 0));
 
     for (int r = 0; r < rowsCount; r++) {
         int len = strlen(rows[r]);
@@ -95,74 +95,74 @@ void MSP4021::_KDraw() {
         for (int i = 0; i < len; i++) {
             rowWidth += this->_KKeyWidth(rows[r][i]);
             if (i < len - 1)
-                { rowWidth += *this->_KEYBOARD_SPACING; }
+                { rowWidth += this->_KEYBOARD_SPACING; }
         }
 
-        int startX = (*this->_SCREEN_WIDTH - rowWidth) / 2;
+        int startX = (this->_SCREEN_WIDTH - rowWidth) / 2;
         int x = startX;
-        int y = startY + r * (*this->_KEYBOARD_H + *this->_KEYBOARD_SPACING);
+        int y = startY + r * (this->_KEYBOARD_H + this->_KEYBOARD_SPACING);
         for (int i = 0; i < len; i++) {
             char c = rows[r][i];
             if (c == ' ') {
-                x += *this->_KEYBOARD_W + *this->_KEYBOARD_SPACING;
+                x += this->_KEYBOARD_W + this->_KEYBOARD_SPACING;
                 continue;
             }
             int keyW = this->_KKeyWidth(c);
             this->_KDrawKey(x, y, keyW, c);
-            x += keyW + *this->_KEYBOARD_SPACING;
+            x += keyW + this->_KEYBOARD_SPACING;
         }
     }
 }
 
 void MSP4021::_KTextDraw() {
-    int textW = *this->_SCREEN_WIDTH - 20;
+    int textW = this->_SCREEN_WIDTH - 20;
     this->rectFill(10, 45, textW, 40, this->rgb(0, 0, 0));
     this->rect(10, 46, textW, 38, this->rgb(255, 255, 255));
-    this->textCenter(15, 47, textW, 40, this->_BUFFER->c_str());
+    this->textCenter(15, 47, textW, 40, this->_BUFFER.c_str());
 }
 
 int MSP4021::_KRowsCount() {
-    bool portrait = *this->_SCREEN_HEIGHT > *this->_SCREEN_WIDTH;
+    bool portrait = this->_SCREEN_HEIGHT > this->_SCREEN_WIDTH;
     if (portrait) {
-        return (*this->_KEYBOARD_MODE == 0)
+        return (this->_KEYBOARD_MODE == 0)
             ? rowsNumPortraitCount
-            : (*this->_KEYBOARD_MODE == 1)
+            : (this->_KEYBOARD_MODE == 1)
                 ? rowsUpperPortraitCount
                 : rowsLowerPortraitCount;
     }
-    return (*this->_KEYBOARD_MODE == 0)
+    return (this->_KEYBOARD_MODE == 0)
         ? rowsNumLandscapeCount
-        : (*this->_KEYBOARD_MODE == 1)
+        : (this->_KEYBOARD_MODE == 1)
             ? rowsUpperLandscapeCount
             : rowsLowerLandscapeCount;
 }
 
 const char** MSP4021::_KRows() {
-    bool portrait = *this->_SCREEN_HEIGHT > *this->_SCREEN_WIDTH;
+    bool portrait = this->_SCREEN_HEIGHT > this->_SCREEN_WIDTH;
     if (portrait) {
-        return (*this->_KEYBOARD_MODE == 0)
+        return (this->_KEYBOARD_MODE == 0)
             ? rowsNumPortrait
-            : (*this->_KEYBOARD_MODE == 1)
+            : (this->_KEYBOARD_MODE == 1)
                 ? rowsUpperPortrait
                 : rowsLowerPortrait;
     }
-    return (*this->_KEYBOARD_MODE == 0)
+    return (this->_KEYBOARD_MODE == 0)
         ? rowsNumLandscape
-        : (*this->_KEYBOARD_MODE == 1)
+        : (this->_KEYBOARD_MODE == 1)
             ? rowsUpperLandscape
             : rowsLowerLandscape;
 }
 
 int MSP4021::_KKeyWidth(char c) {
-    bool portrait = *this->_SCREEN_HEIGHT > *this->_SCREEN_WIDTH;
+    bool portrait = this->_SCREEN_HEIGHT > this->_SCREEN_WIDTH;
     if (c == '_') {
         if (portrait)
-            { return (*this->_KEYBOARD_W * 5) + (*this->_KEYBOARD_SPACING * 4); }
-        return (*this->_KEYBOARD_W * 4) + (*this->_KEYBOARD_SPACING * 3);
+            { return (this->_KEYBOARD_W * 5) + (this->_KEYBOARD_SPACING * 4); }
+        return (this->_KEYBOARD_W * 4) + (this->_KEYBOARD_SPACING * 3);
     }
     if (c == '^' || c == '<')
-        { return (*this->_KEYBOARD_W * 2) + *this->_KEYBOARD_SPACING; }
-    return *this->_KEYBOARD_W;
+        { return (this->_KEYBOARD_W * 2) + this->_KEYBOARD_SPACING; }
+    return this->_KEYBOARD_W;
 }
 
 void MSP4021::_KDrawKey(int x, int y, int w, char c, bool pressed) {
@@ -170,9 +170,9 @@ void MSP4021::_KDrawKey(int x, int y, int w, char c, bool pressed) {
     const char* label = this->_KKeyLabel(c, str);
     uint16_t keyColor = this->_KKeyColor(c, pressed);
 
-    this->rectFill(x, y, w, *this->_KEYBOARD_H, keyColor);
+    this->rectFill(x, y, w, this->_KEYBOARD_H, keyColor);
     this->setTextColor(this->rgb(255, 255, 255));
-    this->textCenter(x, y - 3, w, *this->_KEYBOARD_H, label);
+    this->textCenter(x, y - 3, w, this->_KEYBOARD_H, label);
 }
 
 uint16_t MSP4021::_KKeyColor(char c, bool pressed) {
@@ -194,8 +194,8 @@ const char* MSP4021::_KKeyLabel(char c, char* str) {
 
 void MSP4021::_KLayoutMetrics(int& rowsCount, int& keyboardHeight, int& startY) {
     rowsCount = this->_KRowsCount();
-    keyboardHeight = rowsCount * (*this->_KEYBOARD_H + *this->_KEYBOARD_SPACING) - *this->_KEYBOARD_SPACING;
-    startY = *this->_SCREEN_HEIGHT - keyboardHeight - 10;
+    keyboardHeight = rowsCount * (this->_KEYBOARD_H + this->_KEYBOARD_SPACING) - this->_KEYBOARD_SPACING;
+    startY = this->_SCREEN_HEIGHT - keyboardHeight - 10;
 }
 
 void MSP4021::KDraw(const char* title) {
@@ -206,14 +206,14 @@ void MSP4021::KDraw(const char* title) {
         this->setFont(DejaVuSans_Bold_18);
         this->setTextColor(this->rgb(255, 255, 255));
         this->setTextScale(1);
-        this->textCenter(10, 90, *this->_SCREEN_WIDTH - 20, 20, title);
+        this->textCenter(10, 90, this->_SCREEN_WIDTH - 20, 20, title);
     }
     
-    this->rectFill(0, 0, *this->_SCREEN_WIDTH, 34, this->rgb(0, 180, 80));
+    this->rectFill(0, 0, this->_SCREEN_WIDTH, 34, this->rgb(0, 180, 80));
     this->setFont(DejaVuSans_Bold_16);
     this->setTextColor(this->rgb(255, 255, 255));
     this->setTextScale(2);
-    this->textCenter(0, 0, *this->_SCREEN_WIDTH, 34, "OK");
+    this->textCenter(0, 0, this->_SCREEN_WIDTH, 34, "OK");
 
     this->_KTextDraw();
     this->_KDraw();
@@ -222,9 +222,9 @@ void MSP4021::KDraw(const char* title) {
 
 bool MSP4021::KUpdate(int tx, int ty) {
     this->TPause();
-    if (ty >= 10 && ty <= 34 && tx >= 10 && tx <= *this->_SCREEN_WIDTH - 20) {
+    if (ty >= 10 && ty <= 34 && tx >= 10 && tx <= this->_SCREEN_WIDTH - 20) {
         this->TResume();
-        *this->_KEYBOARD_MODE = 1;
+        this->_KEYBOARD_MODE = 1;
         return true;
     }
 
@@ -239,40 +239,40 @@ bool MSP4021::KUpdate(int tx, int ty) {
         for (int i = 0; i < len; i++) {
             rowWidth += this->_KKeyWidth(rows[r][i]);
             if (i < len - 1)
-                { rowWidth += *this->_KEYBOARD_SPACING; }
+                { rowWidth += this->_KEYBOARD_SPACING; }
         }
 
-        int startX = (*this->_SCREEN_WIDTH - rowWidth) / 2;
+        int startX = (this->_SCREEN_WIDTH - rowWidth) / 2;
         int x = startX;
-        int y = startY + r * (*this->_KEYBOARD_H + *this->_KEYBOARD_SPACING);
+        int y = startY + r * (this->_KEYBOARD_H + this->_KEYBOARD_SPACING);
 
         for (int i = 0; i < len; i++) {
             char c = rows[r][i];
             if (c == ' ') {
-                x += *this->_KEYBOARD_W + *this->_KEYBOARD_SPACING;
+                x += this->_KEYBOARD_W + this->_KEYBOARD_SPACING;
                 continue;
             }
             int keyW = this->_KKeyWidth(c);
 
-            if (tx >= x && tx <= x + keyW && ty >= y && ty <= y + *this->_KEYBOARD_H) {
+            if (tx >= x && tx <= x + keyW && ty >= y && ty <= y + this->_KEYBOARD_H) {
                 this->_KDrawKey(x, y, keyW, c, true);
                 if (c == '^') {
-                    (*this->_KEYBOARD_MODE)++;
-                    if (*this->_KEYBOARD_MODE > 2)
-                        { *this->_KEYBOARD_MODE = 0; }
+                    (this->_KEYBOARD_MODE)++;
+                    if (this->_KEYBOARD_MODE > 2)
+                        { this->_KEYBOARD_MODE = 0; }
 
                     delay(150);
                     this->_KDraw();
                     this->TResume();
                     return false;
                 }
-                if (c == '_') { (*this->_BUFFER) += ' '; }
+                if (c == '_') { (this->_BUFFER) += ' '; }
                 else if (c == '<') {
-                    if (this->_BUFFER->length() > 0)
-                        { this->_BUFFER->resize(this->_BUFFER->length() - 1); }
+                    if (this->_BUFFER.length() > 0)
+                        { this->_BUFFER.resize(this->_BUFFER.length() - 1); }
                 } else {
-                    if (this->_BUFFER->length() < 64)
-                        { (*this->_BUFFER) += c; }
+                    if (this->_BUFFER.length() < 64)
+                        { this->_BUFFER += c; }
                 }
 
                 this->_KTextDraw();
@@ -281,7 +281,7 @@ bool MSP4021::KUpdate(int tx, int ty) {
                 this->TResume();
                 return false;
             }
-            x += keyW + *this->_KEYBOARD_SPACING;
+            x += keyW + this->_KEYBOARD_SPACING;
         }
     }
     this->TResume();
@@ -289,7 +289,7 @@ bool MSP4021::KUpdate(int tx, int ty) {
 }
 
 std::string MSP4021::KRead() {
-    std::string out = *this->_BUFFER;
+    std::string out = this->_BUFFER;
     while (!out.empty() && out.front() == ' ')
         { out.erase(out.begin()); }
     while (!out.empty() && out.back() == ' ')
