@@ -64,6 +64,7 @@ namespace ST7796S {
             void _char(uint16_t x, uint16_t y, uint16_t myChar);
             void _charBounds(uint16_t c, int &w, int &h, int &yOff);
             void _image(int x, int y, int w, int h, const uint16_t* img);
+            void _textAlign(int x, int y, int w, int h, const char* str, uint8_t alignH, uint8_t alignV );
         protected:
             int _SCREEN_WIDTH = this->_RAW_WIDTH;
             int _SCREEN_HEIGHT = this->_RAW_HEIGHT;
@@ -177,6 +178,83 @@ namespace ST7796S {
              * @param str UTF-8 string.
              */
             void text(uint16_t x, uint16_t y, const char* str);
+            
+            /**
+             * @brief Draws UTF-8 text aligned to the top-left of an area.
+             *
+             * @param x Area position X.
+             * @param y Area position Y.
+             * @param w Area width.
+             * @param h Area height.
+             * @param str UTF-8 string.
+             */
+            inline void textTopLeft(int x, int y, int w, int h, const char* str) { this->_textAlign(x, y, w, h, str, 0, 0); }
+
+            /**
+             * @brief Draws UTF-8 text aligned to the top-center of an area.
+             *
+             * @param x Area position X.
+             * @param y Area position Y.
+             * @param w Area width.
+             * @param h Area height.
+             * @param str UTF-8 string.
+             */
+            inline void textTopCenter(int x, int y, int w, int h, const char* str) { this->_textAlign(x, y, w, h, str, 1, 0); }
+
+            /**
+             * @brief Draws UTF-8 text aligned to the top-right of an area.
+             *
+             * @param x Area position X.
+             * @param y Area position Y.
+             * @param w Area width.
+             * @param h Area height.
+             * @param str UTF-8 string.
+             */
+            inline void textTopRight(int x, int y, int w, int h, const char* str) { this->_textAlign(x, y, w, h, str, 2, 0); }
+
+            /**
+             * @brief Draws UTF-8 text aligned to the bottom-left of an area.
+             *
+             * @param x Area position X.
+             * @param y Area position Y.
+             * @param w Area width.
+             * @param h Area height.
+             * @param str UTF-8 string.
+             */
+            inline void textBottomLeft(int x, int y, int w, int h, const char* str) { this->_textAlign(x, y, w, h, str, 0, 2); }
+
+            /**
+             * @brief Draws UTF-8 text aligned to the bottom-center of an area.
+             *
+             * @param x Area position X.
+             * @param y Area position Y.
+             * @param w Area width.
+             * @param h Area height.
+             * @param str UTF-8 string.
+             */
+            inline void textBottomCenter(int x, int y, int w, int h, const char* str) { this->_textAlign(x, y, w, h, str, 1, 2); }
+
+            /**
+             * @brief Draws UTF-8 text aligned to the bottom-right of an area.
+             *
+             * @param x Area position X.
+             * @param y Area position Y.
+             * @param w Area width.
+             * @param h Area height.
+             * @param str UTF-8 string.
+             */
+            inline void textBottomRight(int x, int y, int w, int h, const char* str) { this->_textAlign(x, y, w, h, str, 2, 2); }
+
+            /**
+             * @brief Draws UTF-8 text aligned to the center-left of an area.
+             *
+             * @param x Area position X.
+             * @param y Area position Y.
+             * @param w Area width.
+             * @param h Area height.
+             * @param str UTF-8 string.
+             */
+            inline void textCenterLeft(int x, int y, int w, int h, const char* str) { this->_textAlign(x, y, w, h, str, 0, 1); }
 
             /**
              * @brief Draws centered UTF-8 text inside a rectangle area.
@@ -187,7 +265,18 @@ namespace ST7796S {
              * @param h Area height.
              * @param str UTF-8 string.
              */
-            void textCenter(int x, int y, int w, int h, const char* str);
+            inline void textCenter(int x, int y, int w, int h, const char* str) { this->_textAlign(x, y, w, h, str, 1, 1); }
+
+            /**
+             * @brief Draws UTF-8 text aligned to the center-right of an area.
+             *
+             * @param x Area position X.
+             * @param y Area position Y.
+             * @param w Area width.
+             * @param h Area height.
+             * @param str UTF-8 string.
+             */
+            inline void textCenterRight(int x, int y, int w, int h, const char* str) { this->_textAlign(x, y, w, h, str, 2, 1); }
 
             /**
              * @brief Draws a RGB565 image from a Stream source.
