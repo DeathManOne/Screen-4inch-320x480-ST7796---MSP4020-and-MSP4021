@@ -27,35 +27,6 @@ Useful for:
 
 ---
 
-### Full text alignment system
-
-Added new alignment helpers:
-
-* `textTopLeft()`
-* `textTopCenter()`
-* `textTopRight()`
-* `textCenterLeft()`
-* `textCenter()`
-* `textCenterRight()`
-* `textBottomLeft()`
-* `textBottomCenter()`
-* `textBottomRight()`
-
-These helpers simplify positioning UTF-8 text inside rectangular areas.
-
----
-
-### Screen size helpers
-
-Added:
-
-* `width()`
-* `height()`
-
-Values automatically update with display rotation.
-
----
-
 ## Improved
 
 ### Text rendering engine
