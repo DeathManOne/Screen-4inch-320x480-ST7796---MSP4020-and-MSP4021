@@ -116,19 +116,42 @@ void MSP4020::_charBounds(uint16_t c, int &w, int &h, int &yOff) {
 void MSP4020::_textAlign(int x, int y, int w, int h, const char* str, uint8_t alignH, uint8_t alignV) {
     if (!this->_FONT || !str || !*str)
         { return; }
+
+    int totalWidth;
+    int textHeight;
+    int minYOffset;
+
+    this->_textBounds(str, totalWidth, textHeight, minYOffset);
+
+    int textX = x;
+    int textY = y - (minYOffset * this->_TEXT_SCALE);
+
+    if (alignH == 1) { textX = x + (w - totalWidth) / 2; }
+    else if (alignH == 2) { textX = x + w - totalWidth; }
+
+    if (alignV == 1) { textY = y + (h - textHeight) / 2 - (minYOffset * this->_TEXT_SCALE); }
+    else if (alignV == 2) { textY = y + h - textHeight - (minYOffset * this->_TEXT_SCALE); }
+
+    this->text(textX, textY, str);
+}
+
+void MSP4020::_textBounds(const char* str, int &width, int &height, int &minYOffset) {
+    width = 0;
+    height = 0;
+    minYOffset = 0;
+
+    if (!this->_FONT || !str || !*str)
+        { return; }
     uint8_t scale = this->_TEXT_SCALE;
 
-    int totalWidth = 0;
     int maxHeight = 0;
-    int minYOffset = 0;
     int maxYOffset = 0;
 
     const char* ptr = str;
     while (*ptr) {
         uint16_t c;
 
-        if ((*ptr & 0x80) == 0)
-            { c = *ptr++; }
+        if ((*ptr & 0x80) == 0) { c = *ptr++; }
         else if ((*ptr & 0xE0) == 0xC0) {
             c = ((*ptr & 0x1F) << 6) | (ptr[1] & 0x3F);
             ptr += 2;
@@ -142,8 +165,8 @@ void MSP4020::_textAlign(int x, int y, int w, int h, const char* str, uint8_t al
 
         int cw, ch, yOff;
         this->_charBounds(c, cw, ch, yOff);
+        width += (cw + 1) * scale;
 
-        totalWidth += (cw + 1) * scale;
         if (ch > maxHeight)
             { maxHeight = ch; }
         if (yOff < minYOffset)
@@ -152,19 +175,9 @@ void MSP4020::_textAlign(int x, int y, int w, int h, const char* str, uint8_t al
             { maxYOffset = yOff; }
     }
 
-    if (totalWidth > 0)
-        { totalWidth -= scale; }
-    int textHeight = (maxHeight + maxYOffset - minYOffset) * scale;
-    int textX = x;
-    int textY = y - (minYOffset * scale);
-
-    if (alignH == 1) { textX = x + (w - totalWidth) / 2; }
-    else if (alignH == 2) { textX = x + w - totalWidth; }
-
-    if (alignV == 1) { textY = y + (h - textHeight) / 2 - (minYOffset * scale); }
-    else if (alignV == 2) { textY = y + h - textHeight - (minYOffset * scale); }
-
-    this->text(textX, textY, str);
+    if (width > 0)
+        { width -= scale; }
+    height = (maxHeight + maxYOffset - minYOffset) * scale;
 }
 
 void MSP4020::text(uint16_t x, uint16_t y, const char* str) {
@@ -217,3 +230,14 @@ void MSP4020::text(uint16_t x, uint16_t y, const char* str) {
     }
 }
 
+int MSP4020::textWidth(const char* str) {
+    int w, h, y;
+    this->_textBounds(str, w, h, y);
+    return w;
+}
+
+int MSP4020::textHeight(const char* str) {
+    int w, h, y;
+    this->_textBounds(str, w, h, y);
+    return h;
+}

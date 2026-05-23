@@ -65,6 +65,7 @@ namespace ST7796S {
             void _charBounds(uint16_t c, int &w, int &h, int &yOff);
             void _image(int x, int y, int w, int h, const uint16_t* img);
             void _textAlign(int x, int y, int w, int h, const char* str, uint8_t alignH, uint8_t alignV );
+            void _textBounds(const char* str, int& width, int& height, int& minYOffset);
         protected:
             int _SCREEN_WIDTH = this->_RAW_WIDTH;
             int _SCREEN_HEIGHT = this->_RAW_HEIGHT;
@@ -178,6 +179,26 @@ namespace ST7796S {
              * @param str UTF-8 string.
              */
             void text(uint16_t x, uint16_t y, const char* str);
+            
+            /**
+             * @brief Returns the rendered width of a UTF-8 text string.
+             *
+             * Uses the current font and text scale.
+             *
+             * @param str UTF-8 string.
+             * @return Text width in pixels.
+             */
+            int textWidth(const char* str);
+
+            /**
+             * @brief Returns the rendered height of a UTF-8 text string.
+             *
+             * Uses the current font and text scale.
+             *
+             * @param str UTF-8 string.
+             * @return Text height in pixels.
+             */
+            int textHeight(const char* str);
             
             /**
              * @brief Draws UTF-8 text aligned to the top-left of an area.

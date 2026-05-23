@@ -8,11 +8,42 @@ Designed for:
 * ST7796S 320x480 SPI displays
 * MSP4020 / MSP4021 modules
 * High speed SPI rendering
-* Simple API
 * UTF-8 text rendering
-* RGB565 images
-* Virtual keyboard
-* Touchscreen calibration
+* RGB565 image rendering
+* Virtual keyboard support
+* Touch calibration
+* Simple and lightweight API
+
+---
+
+# VERSION
+
+Current version: `1.3.0`
+
+See:
+
+```text
+CHANGELOG.md
+```
+
+for release history.
+
+---
+
+# WHY THIS LIBRARY
+
+This library focuses on:
+
+* lightweight rendering
+* simple API
+* UTF-8 support
+* touch calibration
+* virtual keyboard
+* RGB565 performance
+* low memory usage
+* ESP32 optimization
+
+Unlike generic TFT libraries, this project is specifically optimized for MSP4020/MSP4021 hardware.
 
 ---
 
@@ -28,13 +59,16 @@ Display only:
 * UTF-8 text rendering
 * Custom fonts
 * Text alignment helpers
+* Text size metrics
 * Images from flash memory
 * Images from SD card / Stream
-* Basic graphics primitives
+* Graphics primitives
+* Rounded rectangles
 * Progress bars
 * Sliders
-* Rounded rectangles
 * Arcs
+
+---
 
 ## MSP4021
 
@@ -213,16 +247,7 @@ int width = TFT->width();
 int height = TFT->height();
 ```
 
-Values are automatically updated when rotation changes.
-
-Example:
-
-```cpp
-TFT->setRotation(1);
-
-Serial.println(TFT->width());
-Serial.println(TFT->height());
-```
+Values automatically update with rotation.
 
 ---
 
@@ -245,6 +270,46 @@ TFT->text(
     20,
     20,
     "Bonjour été àèù"
+);
+```
+
+---
+
+# Text metrics
+
+```cpp
+int w = TFT->textWidth("Hello");
+int h = TFT->textHeight("Hello");
+```
+
+Uses current:
+
+* font
+* UTF-8 rendering
+* text scale
+
+Useful for:
+
+* dynamic layouts
+* custom widgets
+* clipping
+* manual centering
+* responsive UI
+
+---
+
+# Dynamic layout example
+
+```cpp
+const char* title = "SETTINGS";
+
+int w = TFT->textWidth(title);
+int h = TFT->textHeight(title);
+
+TFT->text(
+    (TFT->width() - w) / 2,
+    20,
+    title
 );
 ```
 

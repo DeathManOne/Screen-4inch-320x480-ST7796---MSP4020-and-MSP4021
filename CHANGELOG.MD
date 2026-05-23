@@ -4,6 +4,81 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+# [1.3.0] - 2026-05-24
+
+## Added
+
+### Text metrics helpers
+
+Added:
+
+* `textWidth()`
+* `textHeight()`
+
+These functions return rendered UTF-8 text dimensions using the current font and text scale.
+
+Useful for:
+
+* dynamic layouts
+* responsive UI
+* manual centering
+* clipping
+* custom widgets
+
+---
+
+### Full text alignment system
+
+Added new alignment helpers:
+
+* `textTopLeft()`
+* `textTopCenter()`
+* `textTopRight()`
+* `textCenterLeft()`
+* `textCenter()`
+* `textCenterRight()`
+* `textBottomLeft()`
+* `textBottomCenter()`
+* `textBottomRight()`
+
+These helpers simplify positioning UTF-8 text inside rectangular areas.
+
+---
+
+### Screen size helpers
+
+Added:
+
+* `width()`
+* `height()`
+
+Values automatically update with display rotation.
+
+---
+
+## Improved
+
+### Text rendering engine
+
+* Added private `_textBounds()` engine.
+* Refactored `_textAlign()` internals.
+* Reduced duplicated UTF-8 parsing logic.
+* Improved text positioning consistency.
+* Improved text alignment precision.
+* Improved API consistency.
+
+---
+
+### Documentation
+
+* README fully updated.
+* Added alignment examples.
+* Added text metrics examples.
+* Improved API documentation.
+* Added project changelog.
+
+---
+
 # [1.2.0] - 2026-05-21
 
 ## Added
