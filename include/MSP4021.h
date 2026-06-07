@@ -120,7 +120,7 @@ namespace ST7796S {
             /**
              * @brief Clears the keyboard text buffer.
              */
-            inline void KClear() { this->_BUFFER[0] = 0; }
+            inline void KClear() { this->_BUFFER[0] = '\0'; }
             
             /**
              * @brief Reads calibrated touch coordinates.
