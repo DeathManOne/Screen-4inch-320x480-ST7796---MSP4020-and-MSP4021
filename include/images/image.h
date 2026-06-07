@@ -21,10 +21,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _ST7796S_IMAGE_
-#define _ST7796S_IMAGE_
-
-#include <Arduino.h>
+#pragma once
+#include <cstdint>
 
 namespace ST7796S {
     struct Image {
@@ -36,4 +34,3 @@ namespace ST7796S {
         const bool hasTransparency;
     };
 }
-#endif

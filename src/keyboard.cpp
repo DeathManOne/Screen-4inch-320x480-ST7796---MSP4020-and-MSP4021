@@ -21,9 +21,10 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../include/MSP4021.h"
-#include "../include/fonts/DejaVuSans_Bold_16.h"
-#include "../include/fonts/DejaVuSans_Bold_18.h"
+#include <cstring>
+#include "MSP4021.h"
+#include "fonts/DejaVuSans_Bold_16.h"
+#include "fonts/DejaVuSans_Bold_18.h"
 using namespace ST7796S;
 
 static const char* rowsUpperLandscape[] = {
@@ -118,7 +119,7 @@ void MSP4021::_KTextDraw() {
     int textW = this->_SCREEN_WIDTH - 20;
     this->rectFill(10, 45, textW, 40, this->rgb(0, 0, 0));
     this->rect(10, 46, textW, 38, this->rgb(255, 255, 255));
-    this->textCenter(15, 47, textW, 40, this->_BUFFER.c_str());
+    this->textCenter(15, 47, textW, 40, this->_BUFFER);
 }
 
 int MSP4021::_KRowsCount() {
@@ -198,6 +199,15 @@ void MSP4021::_KLayoutMetrics(int& rowsCount, int& keyboardHeight, int& startY) 
     startY = this->_SCREEN_HEIGHT - keyboardHeight - 10;
 }
 
+void MSP4021::KSetText(const char* text) {
+    if (!text) {
+        this->_BUFFER[0] = '\0';
+        return;
+    }
+    strncpy(this->_BUFFER, text, sizeof(this->_BUFFER) - 1);
+    this->_BUFFER[sizeof(this->_BUFFER) - 1] = '\0';
+}
+
 void MSP4021::KDraw(const char* title) {
     this->TPause();
     this->fillScreen(this->rgb(0,0,0));
@@ -266,13 +276,20 @@ bool MSP4021::KUpdate(int tx, int ty) {
                     this->TResume();
                     return false;
                 }
-                if (c == '_') { (this->_BUFFER) += ' '; }
-                else if (c == '<') {
-                    if (this->_BUFFER.length() > 0)
-                        { this->_BUFFER.resize(this->_BUFFER.length() - 1); }
+                size_t len = strlen(this->_BUFFER);
+                if (c == '_') {
+                    if (len < 64) {
+                        this->_BUFFER[len] = ' ';
+                        this->_BUFFER[len + 1] = '\0';
+                    }
+                } else if (c == '<') {
+                    if (len > 0)
+                        { this->_BUFFER[len - 1] = '\0'; }
                 } else {
-                    if (this->_BUFFER.length() < 64)
-                        { this->_BUFFER += c; }
+                    if (len < 64) {
+                        this->_BUFFER[len] = c;
+                        this->_BUFFER[len + 1] = '\0';
+                    }
                 }
 
                 this->_KTextDraw();
@@ -288,11 +305,14 @@ bool MSP4021::KUpdate(int tx, int ty) {
     return false;
 }
 
-std::string MSP4021::KRead() {
-    std::string out = this->_BUFFER;
-    while (!out.empty() && out.front() == ' ')
-        { out.erase(out.begin()); }
-    while (!out.empty() && out.back() == ' ')
-        { out.pop_back(); }
-    return out;
+const char* MSP4021::KRead() {
+    while (this->_BUFFER[0] == ' ')
+        { memmove(this->_BUFFER, this->_BUFFER + 1, strlen(this->_BUFFER)); }
+    size_t len = strlen(this->_BUFFER);
+
+    while (len > 0 && this->_BUFFER[len - 1] == ' ') {
+        this->_BUFFER[len - 1] = '\0';
+        len--;
+    }
+    return this->_BUFFER;
 }

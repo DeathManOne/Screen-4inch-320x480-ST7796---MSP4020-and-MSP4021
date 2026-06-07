@@ -1,8 +1,8 @@
-#ifndef _ST7796S_FONT_DEJAVUSANS_BOLD_12_
-#define _ST7796S_FONT_DEJAVUSANS_BOLD_12_
+#pragma once
 
-#include <Arduino.h>
-#include <fonts/font.h>
+#include <pgmspace.h>
+#include <cstdint>
+#include "fonts/font.h"
 
 namespace ST7796S {
     const uint32_t DejaVuSans_Bold_12_data[] PROGMEM = {
@@ -212,4 +212,3 @@ namespace ST7796S {
         DejaVuSans_Bold_12_unicode
     };
 }
-#endif

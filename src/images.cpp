@@ -21,7 +21,9 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../include/MSP4020.h"
+#include <pgmspace.h>
+#include <Stream.h>
+#include "MSP4020.h"
 using namespace ST7796S;
 
 void MSP4020::_image(int x, int y, int w, int h, const uint16_t* img) {

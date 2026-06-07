@@ -21,13 +21,11 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _ST7796S_
-#define _ST7796S_
+#pragma once
 
 #include <Arduino.h>
-#include <algorithm>
-#include <cmath>
 #include <SPI.h>
+#include <Stream.h>
 #include "fonts/font.h"
 #include "images/image.h"
 
@@ -35,23 +33,23 @@ namespace ST7796S {
     class MSP4020 {
         private:
             SPISettings _SETTINGS = SPISettings(4000000u, MSBFIRST, SPI_MODE0);
-            int _PIN_CS = -1;
-            int _PIN_DC = -1;
-            int _PIN_RST = -1;
-            int _RAW_WIDTH = 380;
+            int _PIN_CS     = -1;
+            int _PIN_DC     = -1;
+            int _PIN_RST    = -1;
+            int _RAW_WIDTH  = 380;
             int _RAW_HEIGHT = 420;
             static const int _BUFFER_SIZE = 1024;
             uint16_t _BUFFER_A[_BUFFER_SIZE];
             uint16_t _BUFFER_B[_BUFFER_SIZE];
-            uint16_t *_BUFFER_CPU = _BUFFER_A;
-            uint16_t *_BUFFER_DMA = _BUFFER_B;
-            const Font *_FONT = nullptr;
-            uint8_t _TEXT_SCALE = 1;
-            uint16_t _TEXT_COLOR = this->rgb(255, 255, 255);
-            inline void _start() { digitalWrite(this->_PIN_CS, LOW); }
-            inline void _stop() { digitalWrite(this->_PIN_CS, HIGH); }
-            inline void _DC_CMD() { digitalWrite(this->_PIN_DC, LOW); }
-            inline void _DC_DATA() { digitalWrite(this->_PIN_DC, HIGH); }
+            uint16_t *_BUFFER_CPU   = _BUFFER_A;
+            uint16_t *_BUFFER_DMA   = _BUFFER_B;
+            const Font *_FONT       = nullptr;
+            uint8_t _TEXT_SCALE     = 1;
+            uint16_t _TEXT_COLOR    = this->rgb(255, 255, 255);
+            inline void _start()    { digitalWrite(this->_PIN_CS, LOW); }
+            inline void _stop()     { digitalWrite(this->_PIN_CS, HIGH); }
+            inline void _DC_CMD()   { digitalWrite(this->_PIN_DC, LOW); }
+            inline void _DC_DATA()  { digitalWrite(this->_PIN_DC, HIGH); }
             void _init();
             void _transactionBegin();
             void _transactionEnd();
@@ -67,10 +65,10 @@ namespace ST7796S {
             void _textAlign(int x, int y, int w, int h, const char* str, uint8_t alignH, uint8_t alignV );
             void _textBounds(const char* str, int& width, int& height, int& minYOffset);
         protected:
-            int _SCREEN_WIDTH = this->_RAW_WIDTH;
-            int _SCREEN_HEIGHT = this->_RAW_HEIGHT;
-            int _SCREEN_ROTATION = 0;
-            SPIClass *_SPI = nullptr;
+            int _SCREEN_WIDTH       = this->_RAW_WIDTH;
+            int _SCREEN_HEIGHT      = this->_RAW_HEIGHT;
+            int _SCREEN_ROTATION    = 0;
+            SPIClass *_SPI          = nullptr;
         public:
             /**
              * @brief Initializes the ST7796S TFT display driver.
@@ -451,4 +449,3 @@ namespace ST7796S {
             void slider(int x, int y, int w, int h, int value, uint16_t color);
     };
 }
-#endif

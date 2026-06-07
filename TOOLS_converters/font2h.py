@@ -135,9 +135,8 @@ def generate_font(font_path, size):
 
     line_length = 16
     with open(output_file, "w", encoding="utf-8") as f:
-        guard = f"_ST7796S_FONT_{font_name.upper()}_{size}_"
-        f.write(f"#ifndef {guard}\n#define {guard}\n\n")
-        f.write("#include <Arduino.h>\n#include <fonts/font.h>\n\n")
+        f.write(f"#pragma once\n\n")
+        f.write("#include <pgmspace.h>\n#include <cstdint>\n#include <font.h>\n\n")
         f.write("namespace ST7796S {\n")
 
         f.write(f"    const uint32_t {font_name}_{size}_data[] PROGMEM = {{\n")
@@ -188,7 +187,7 @@ def generate_font(font_path, size):
             f"        {font_name}_{size}_unicode\n"
             f"    }};\n"
         )
-        f.write("}\n#endif\n")
+        f.write("}\n")
 
     print(f"Generated: {output_file}")
 

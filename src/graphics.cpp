@@ -21,7 +21,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../include/MSP4020.h"
+#include <algorithm>
+#include "MSP4020.h"
 using namespace ST7796S;
 
 void MSP4020::_pixel(int x, int y, uint16_t color) {
@@ -260,7 +261,7 @@ void MSP4020::rectRound(int x, int y, int width, int height, int radius, uint16_
         return;
     }
 
-    int maxRadius = min(width, height) / 2;
+    int maxRadius = std::min(width, height) / 2;
     if (radius > maxRadius)
         { radius = maxRadius; }
 
@@ -307,7 +308,7 @@ void MSP4020::rectRoundFill(int x, int y, int width, int height, int radius, uin
         return;
     }
 
-    int maxRadius = min(width, height) / 2;
+    int maxRadius = std::min(width, height) / 2;
     if (radius > maxRadius)
         { radius = maxRadius; }
 

@@ -21,10 +21,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _ST7796S_FONT_
-#define _ST7796S_FONT_
-
-#include <Arduino.h>
+#pragma once
+#include <cstdint>
 
 namespace ST7796S {
     struct Font {
@@ -38,4 +36,3 @@ namespace ST7796S {
         const uint16_t* unicode;
     };
 }
-#endif

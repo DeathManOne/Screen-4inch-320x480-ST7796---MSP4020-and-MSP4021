@@ -21,7 +21,9 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../include/MSP4020.h"
+#include <Arduino.h>
+#include <algorithm>
+#include "MSP4020.h"
 using namespace ST7796S;
 
 MSP4020::MSP4020(SPIClass &spi, int pinCS, int pinDC, int screenWidth, int screenHeight, int pinRST) {

@@ -21,7 +21,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../include/MSP4020.h"
+#include <pgmspace.h>
+#include "MSP4020.h"
 using namespace ST7796S;
 
 void MSP4020::_char(uint16_t x, uint16_t y, uint16_t myChar) {

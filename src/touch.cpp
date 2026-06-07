@@ -21,7 +21,9 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../include/MSP4021.h"
+#include <Arduino.h>
+#include <cmath>
+#include "MSP4021.h"
 using namespace ST7796S;
 
 MSP4021::MSP4021(SPIClass &spi, int pinCS_TOUCH, int pinCS_TFT, int pinDC_TFT, int screenWidth, int screenHeight, int pinRST_TFT)
@@ -408,7 +410,7 @@ bool MSP4021::TCalibrate() {
         ry[i] = (float)ty;
     }
     for (int i = 0; i < count; i++) {
-        if (isnan(rx[i]) || isnan(ry[i]))
+        if (std::isnan(rx[i]) || std::isnan(ry[i]))
             { return false; }
     }
     return this->_affineCalibration(sx, sy, rx, ry, count);

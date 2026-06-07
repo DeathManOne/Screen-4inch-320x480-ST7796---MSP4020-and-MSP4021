@@ -21,35 +21,32 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _XPT2046_
-#define _XPT2046_
-
+#pragma once
 #include "MSP4020.h"
-#include <string>
 
 namespace ST7796S {
     class MSP4021 : public MSP4020 {
         private:
             SPISettings _SETTINGS = SPISettings(100000u, MSBFIRST, SPI_MODE0);
-            std::string _BUFFER = "";
-            bool _PAUSED = false;
-            bool _WAS_ACTIVE = false;
-            int _PIN_CS = -1;
-            int _LAST_X = -1;
-            int _LAST_Y = -1;
-            int _KEYBOARD_W = 40;
-            int _KEYBOARD_H = 40;
-            int _KEYBOARD_MODE = 1;
-            int _KEYBOARD_SPACING = 5;
-            bool _INVERT_X = false;
-            bool _INVERT_Y = false;
-            bool _SWAP_XY = false;
-            float _COEFF_XA = 1;
-            float _COEFF_XB = 0;
-            float _COEFF_XC = 0;
-            float _COEFF_YA = 0;
-            float _COEFF_YB = 1;
-            float _COEFF_YC = 0;
+            char _BUFFER[65]        = {};
+            bool _PAUSED            = false;
+            bool _WAS_ACTIVE        = false;
+            int _PIN_CS             = -1;
+            int _LAST_X             = -1;
+            int _LAST_Y             = -1;
+            int _KEYBOARD_W         = 40;
+            int _KEYBOARD_H         = 40;
+            int _KEYBOARD_MODE      = 1;
+            int _KEYBOARD_SPACING   = 5;
+            bool _INVERT_X          = false;
+            bool _INVERT_Y          = false;
+            bool _SWAP_XY           = false;
+            float _COEFF_XA         = 1;
+            float _COEFF_XB         = 0;
+            float _COEFF_XC         = 0;
+            float _COEFF_YA         = 0;
+            float _COEFF_YB         = 1;
+            float _COEFF_YC         = 0;
             inline bool _isTouched() { return this->_readPressure() > 30; }
             uint16_t _readRaw(uint8_t cmd);
             uint16_t _readAverage(uint8_t cmd);
@@ -118,12 +115,12 @@ namespace ST7796S {
              * 
              * @param text UTF-8 text to set.
              */
-            inline void KSetText(const char* text) { this->_BUFFER = text ? text : ""; }
+            void KSetText(const char* text);
             
             /**
              * @brief Clears the keyboard text buffer.
              */
-            inline void KClear() { this->_BUFFER.clear(); }
+            inline void KClear() { this->_BUFFER[0] = 0; }
             
             /**
              * @brief Reads calibrated touch coordinates.
@@ -195,8 +192,6 @@ namespace ST7796S {
              * 
              * @return Current typed text.
              */
-            std::string KRead();
+            const char* KRead();
     };
 }
-#endif
-

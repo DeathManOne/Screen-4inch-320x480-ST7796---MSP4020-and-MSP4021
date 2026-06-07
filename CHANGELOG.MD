@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+# [1.3.8] - 2026-06-07
+
+## Changed
+
+* Replaced legacy header guards with `#pragma once`.
+* Cleaned and minimized includes across headers and source files.
+* Removed unnecessary `Arduino.h` includes where not required.
+* Updated generated font and image headers to use `#pragma once`.
+* Updated generated font headers to include `<font.h>`.
+* Updated generated image headers to include `<image.h>`.
+* Replaced virtual keyboard `std::string` buffer with fixed `char[65]` buffer.
+* Changed `KRead()` return type from `std::string` to `const char*`.
+* Updated keyboard buffer handling to avoid dynamic allocation.
+
+## Improved
+
+* Reduced memory usage in the virtual keyboard.
+* Improved generated asset portability for user projects.
+* Improved include hygiene and build clarity.
+
+---
+
 # [1.3.0] - 2026-05-24
 
 ## Added
@@ -25,8 +47,6 @@ Useful for:
 * clipping
 * custom widgets
 
----
-
 ## Improved
 
 ### Text rendering engine
@@ -37,8 +57,6 @@ Useful for:
 * Improved text positioning consistency.
 * Improved text alignment precision.
 * Improved API consistency.
-
----
 
 ### Documentation
 
@@ -77,8 +95,6 @@ Added:
 * `height()`
 
 These values automatically update with display rotation.
-
----
 
 ## Improved
 

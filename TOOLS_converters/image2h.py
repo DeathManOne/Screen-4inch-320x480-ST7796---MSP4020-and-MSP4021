@@ -55,7 +55,6 @@ def generate_image_header(image_path):
         img = img.resize((new_w, new_h), Image.LANCZOS)
     w, h = img.size
 
-    guard = f"_ST7796S_IMAGE_{image_name.upper()}_"
     pixels = []
 
     for y in range(h):
@@ -63,10 +62,9 @@ def generate_image_header(image_path):
             pixels.append(img.getpixel((x, y)))
 
     with open(output_h, "w", encoding="utf-8") as f:
-        f.write(f"#ifndef {guard}\n")
-        f.write(f"#define {guard}\n\n")
-        f.write("#include <Arduino.h>\n")
-        f.write("#include <images/image.h>\n\n")
+        f.write(f"#pragma once\n\n")
+        f.write("#include <pgmspace.h>\n#include <cstdint>\n#include <image.h>\n\n")
+        
         f.write("namespace ST7796S {\n")
         f.write(f"    const uint16_t {image_name}_width  = {w};\n")
         f.write(f"    const uint16_t {image_name}_height = {h};\n")
@@ -87,7 +85,6 @@ def generate_image_header(image_path):
         f.write("    };\n")
         f.write(f"    const Image {image_name} = {{{w}, {h}, {image_name}_data, 0x0000, false}};\n")
         f.write("}\n")
-        f.write("#endif\n")
     
     with open(output_rgb565, "wb") as f:
         f.write(w.to_bytes(2, "little"))
