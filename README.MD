@@ -1,4 +1,4 @@
-# ST7796S v1.3.8
+# ST7796S
 
 Lightweight and fast ST7796S / MSP4020 / MSP4021 TFT library for ESP32.
 
@@ -40,17 +40,18 @@ Documents/
 #include <MSP4020.h>
 
 SPIClass SPI_TFT(VSPI);
-
-ST7796S::MSP4020 TFT(
-    SPI_TFT,
-    15,
-    2,
-    320,
-    480
-);
+ST7796S::MSP4020* TFT = nullptr;
 
 void setup() {
-    TFT.begin();
+    SPI_TFT.begin();
+
+    TFT = new ST7796S::MSP4020(
+        SPI_TFT,
+        15,
+        2,
+        320,
+        480
+    );
 }
 ```
 
@@ -62,18 +63,19 @@ void setup() {
 #include <MSP4021.h>
 
 SPIClass SPI_TFT(VSPI);
-
-ST7796S::MSP4021 TFT(
-    SPI_TFT,
-    21,
-    15,
-    2,
-    320,
-    480
-);
+ST7796S::MSP4021* TFT = nullptr;
 
 void setup() {
-    TFT.begin();
+    SPI_TFT.begin();
+
+    TFT = new ST7796S::MSP4021(
+        SPI_TFT,
+        21,
+        15,
+        2,
+        320,
+        480
+    );
 }
 ```
 
@@ -93,19 +95,66 @@ uint16_t blue  = TFT.rgb(0, 0, 255);
 
 ## Clear screen
 
+Fills the entire display with a single RGB565 color.
+
 ```cpp
 TFT.fillScreen(
     TFT.rgb(0, 0, 0)
 );
 ```
 
+---
+
 ## Rotation
+
+Sets the display orientation.
 
 ```cpp
 TFT.setRotation(0);
 TFT.setRotation(1);
 TFT.setRotation(2);
 TFT.setRotation(3);
+```
+
+---
+
+## Shutdown
+
+Places the display into its shutdown state.
+If a hardware reset pin is configured, the ST7796S controller is held in hardware reset.
+If no reset pin is available, the display is simply cleared to black.
+
+```cpp
+TFT.shutdown();
+```
+
+---
+
+## Startup
+
+Restarts the display after a previous `shutdown()`.
+When a hardware reset pin is available, the controller is reinitialized automatically and the previous display rotation is restored.
+
+```cpp
+TFT.startup();
+```
+
+---
+
+## Reset
+
+Performs a complete display reset.
+If a hardware reset pin is available, this method internally performs:
+
+```cpp
+TFT.shutdown();
+TFT.startup();
+```
+
+If no reset pin is configured, the display is cleared to black.
+
+```cpp
+TFT.reset();
 ```
 
 ---

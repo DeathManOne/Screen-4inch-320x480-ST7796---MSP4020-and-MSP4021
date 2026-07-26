@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+# [1.4.0] - 2026-07-26
+
+## Added
+
+* Added `shutdown()` to place the display into its shutdown state.
+* Added `startup()` to reinitialize the display after shutdown.
+* Added `reset()` for a complete display restart.
+* Display rotation is now automatically restored after `startup()` and `reset()`.
+
+## Notes
+
+* `shutdown()` holds the hardware reset pin LOW when available.
+* If no reset pin is configured, `shutdown()` and `reset()` clear the display to black instead.
+
+---
+
 # [1.3.8] - 2026-06-07
 
 ## Changed

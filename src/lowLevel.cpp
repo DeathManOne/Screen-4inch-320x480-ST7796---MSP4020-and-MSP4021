@@ -168,6 +168,33 @@ void MSP4020::_swapBuffers() {
     this->_BUFFER_DMA = tmp;
 }
 
+void MSP4020::shutdown() {
+    if (this->_PIN_RST != -1) {
+        digitalWrite(this->_PIN_RST, LOW);
+        return;
+    }
+    this->fillScreen(this->rgb(0, 0, 0));
+}
+
+void MSP4020::startup() {
+    if (this->_PIN_RST == -1)
+        { return; }
+    int rotation = this->_SCREEN_ROTATION;
+
+    this->_SCREEN_ROTATION = -1;
+    this->_init();
+    this->setRotation(rotation);
+}
+
+void MSP4020::reset() {
+    if (this->_PIN_RST == -1) {
+        this->fillScreen(this->rgb(0, 0, 0));
+        return;
+    }
+    this->shutdown();
+    this->startup();
+}
+
 void MSP4020::setRotation(int rotation) {
     rotation = (rotation % 4 + 4) % 4;
     if (this->_SCREEN_ROTATION == rotation)

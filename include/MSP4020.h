@@ -98,6 +98,30 @@ namespace ST7796S {
             ~MSP4020() {}
 
             /**
+             * @brief Places the display in its shutdown state.
+             *
+             * Holds the hardware reset pin LOW when available.
+             * If no reset pin is configured, clears the display to black.
+             */
+            void shutdown();
+
+            /**
+             * @brief Restarts the display after shutdown().
+             *
+             * Reinitializes the controller when a hardware reset pin is available.
+             * The current display rotation is preserved.
+             */
+            void startup();
+
+            /**
+             * @brief Resets and reinitializes the display.
+             *
+             * If no hardware reset pin is configured, clears the display to black.
+             * The current display rotation is preserved.
+             */
+            void reset();
+
+            /**
              * @brief Returns the current screen width in pixels.
              * 
              * Value changes automatically with display rotation.
