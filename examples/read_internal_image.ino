@@ -1,0 +1,56 @@
+/*
+ * examples/read_internal_image.ino
+ *
+ * Copyright (c) 2026 DeathManOne
+ * https://github.com/DeathManOne
+ *
+ * This file is part of the ST7796S library.
+ *
+ * Licensed under the GNU GPL v3 or later.
+ * See LICENSE file for details.
+ */
+
+#include <Arduino.h>
+#include <SPI.h>
+#include <MSP4020.h>
+
+#define TFT_CS 10
+#define TFT_DC 5
+#define TFT_RST -1 // 3.3v or an available pin you want
+#define TFT_MISO A3
+#define TFT_MOSI 11
+#define TFT_CLK 13
+
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 480
+
+ST7796S::MSP4020 *_TFT;
+
+const uint16_t TEST_IMAGE_DATA[] PROGMEM = {
+  0xF800, 0xF800, 0x07E0, 0x07E0,
+  0xF800, 0xF800, 0x07E0, 0x07E0,
+  0x001F, 0x001F, 0xFFFF, 0xFFFF,
+  0x001F, 0x001F, 0xFFFF, 0xFFFF
+};
+
+const ST7796S::Image TEST_IMAGE = {
+  4,
+  4,
+  TEST_IMAGE_DATA,
+  0,
+  false
+};
+
+void setup() {
+  SPI.begin(TFT_CLK, TFT_MISO, TFT_MOSI);
+
+  _TFT = new ST7796S::MSP4020(
+    SPI, TFT_CS, TFT_DC, SCREEN_WIDTH, SCREEN_HEIGHT, TFT_RST,
+    TFT_MISO, -1, TFT_MOSI, TFT_CLK
+  );
+  _TFT->setRotation(3);
+  _TFT->fillScreen(_TFT->rgb(0, 0, 0));
+  _TFT->image(90, 10, TEST_IMAGE);
+}
+
+void loop() {}
